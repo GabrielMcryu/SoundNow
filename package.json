@@ -1,0 +1,22 @@
+{
+  "name": "soundnow",
+  "version": "1.0.0",
+  "description": "Music web application",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrielMcryu/SoundNow.git"
+  },
+  "author": "Gabriel Macharia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GabrielMcryu/SoundNow/issues"
+  },
+  "homepage": "https://github.com/GabrielMcryu/SoundNow#readme",
+  "devDependencies": {
+    "parcel": "^2.8.3"
+  }
+}
