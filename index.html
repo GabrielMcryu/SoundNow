@@ -5,11 +5,106 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="src/css/general.css">
     <link rel="stylesheet" href="src/css/style.css">
-    <script defer src="src/js/script.js"></script>
+
+    <script
+      src="https://kit.fontawesome.com/1935d064dd.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      defer
+      src="https://unpkg.com/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js"
+    ></script>
+    <script type="module" src="src/js/script.js"></script>
 </head>
 <body>
-    <h1>Hello world</h1>
-    <a href="src/pages/login.html">Login</a>
+    <header class="header">
+        <a href="#">
+            <img src="src/img/sound-now-logo.png" alt="SoundNow logo" class="logo" />
+        </a>
+        <nav class="main-nav">
+            <ul class="main-nav-list">
+                <li><a class="main-nav-link" href="#">Dashboard</a></li>
+                <li><a class="main-nav-link" href="src/pages/login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="section-music">
+        <div class="container track">
+            <div class="track-details">
+                <img class="track-image" src="src/img/img1.jpg" alt="">
+                <div class="track-description">
+                    <h2>Song Name</h2>
+                    <p>By: Artist</p>
+                </div>
+            </div>
+
+            <div class="track-song">
+                <button class="track-play">
+                    <i class="fas fa-play"></i>
+                </button>
+
+                <div class="track-vol">
+                    <i class="fas fa-volume-up" id="volume-icon"></i>
+                </div>
+
+                <input 
+                type="range"
+                id="track-volume"
+                min="0"
+                max="100"
+                value="50">
+                <span class="current-time">00:12</span>
+                <input 
+                type="range" 
+                class="duration-slider"
+                min="0"
+                max="100"
+                value="0">
+                
+                <span class="duration-time">04:10</span>
+            </div>
+        </div>
+
+        <div class="container track">
+            <div class="track-details">
+                <img class="track-image" src="src/img/img1.jpg" alt="">
+                <div class="track-description">
+                    <h2>Song Name</h2>
+                    <p>By: Artist</p>
+                </div>
+            </div>
+
+            <div class="track-song">
+                <button class="track-play">
+                    <i class="fas fa-play"></i>
+                </button>
+                <div class="track-vol">
+                    <i class="fas fa-volume-up" id="volume-icon"></i>
+                </div>
+                <input 
+                type="range"
+                id="track-volume"
+                min="0"
+                max="100"
+                value="50">
+                <span class="current-time">00:12</span>
+                <input 
+                type="range" 
+                class="duration-slider"
+                min="0"
+                max="100"
+                value="0">
+                <span class="duration-time">04:10</span>
+            </div>
+
+        </div>
+    </section>
 </body>
 </html>

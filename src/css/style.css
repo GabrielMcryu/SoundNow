@@ -1,3 +1,148 @@
 h1 {
     background-color: aqua;
 }
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+
+    height: 6.4rem;
+    /* padding: 2.4rem 9.6rem 2.4rem 9.6rem; */
+    position: relative;
+    background-color: #212529;
+}
+
+.logo {
+    height: 6.4rem;
+    padding: 0 9.6rem;
+}
+
+/* ********************************************* */
+/* NAVIGATION */
+/* ********************************************* */
+
+.main-nav-list {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 3.2rem;
+    padding: 2.4rem 9.6rem 2.4rem 9.6rem;
+}
+
+.main-nav-link:link,
+.main-nav-link:visited {
+  display: block;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.8rem;
+  transition: all 0.3s;
+}
+
+.main-nav-link:hover,
+.main-nav-link:active {
+  color: #f76707;
+}
+
+/* ********************************************* */
+/* MUSIC SECTION */
+/* ********************************************* */
+
+.section-music {
+    background-color: #fff;
+    padding: 4.8rem 9.6rem 9.6rem 9.6rem;
+}
+
+.track {
+    box-shadow: 0 1.2rem 3.2rem rgba(0, 0, 0, 0.09);
+    margin-bottom: 2.4rem;
+}
+
+.track-details {
+    display: flex;
+    column-gap: 2rem;
+    align-items: center;
+    justify-content: left;
+    padding-top: 2.4rem;
+}
+
+.track-image {
+    width: 15rem;
+}
+
+.track-description {
+    display: flex;
+    flex-direction: column;
+    row-gap: 2rem;
+}
+
+.track-description h2 {
+    font-size: 3.2rem;
+}
+
+.track-description p {
+    font-size: 1.8rem;
+}
+
+.track-song {
+    display: flex;
+    column-gap: 1.8rem;
+    padding: 2.4rem 0;
+    align-items: center;
+    justify-content: left;
+    font-size: 1.6rem;
+}
+
+.track-play {
+    background: #f76707;
+    color: #fff;
+    width: 4rem;
+    height: 4rem;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.track-play:hover,
+.track-play:active {
+    background: #d9480f;
+    transition: all 0.3s;
+}
+
+.track-vol {
+    font-size: 2.4rem;
+}
+
+.track-vol:hover,
+.track-vol:active {
+    cursor: pointer;
+}
+
+.duration-slider {
+    flex-grow: 1;
+}
+
+/* Range slider */
+input[type="range"] {
+    appearance: none;
+    border: 1px solid #888;
+    width: 10%;
+    color: #212529;
+    outline: none;
+    height: 2px;
+}
+  
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    height: 2rem;
+    width: 2rem;
+    background: #f76707;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.duration input[type="range"] {
+    width: 100%;
+  }
