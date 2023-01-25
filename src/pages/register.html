@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Registration</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,24 +21,27 @@
             <ul class="main-nav-list">
                 <li><a class="main-nav-link" href="./upload.html">Upload Song</a></li>
                 <li><a class="main-nav-link" href="../../index.html">Dashboard</a></li>
-                <li><a class="main-nav-link" href="#">Login</a></li>
-                <li><a class="main-nav-link" href="./register.html">Register</a></li>
+                <li><a class="main-nav-link" href="./login.html">Login</a></li>
+                <li><a class="main-nav-link" href="#">Register</a></li>
             </ul>
         </nav>
     </header>
 
     <section class="section-login">
-        <div class="container login">
+        <div class="container register">
             <div class="form">
                 <h2 class="form-header">Login</h2>
-                <form action="" id="login-form">
+                <form action="" id="register-form">
+                    <label class="form-label">Username:</label>
+                    <input class="input-field" type="text" name="username">
+
                     <label class="form-label">Email:</label>
                     <input class="input-field" type="text" name="email">
 
                     <label class="form-label">Password:</label>
                     <input class="input-field" type="password" name="password">
 
-                    <input class="submit-btn" type="submit" value="Login">
+                    <input class="submit-btn" type="submit" value="Register">
                 </form>
             </div>
         </div>

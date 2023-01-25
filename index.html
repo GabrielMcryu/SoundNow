@@ -20,7 +20,7 @@
       defer
       src="https://unpkg.com/smoothscroll-polyfill@0.4.4/dist/smoothscroll.min.js"
     ></script>
-    <script type="module" src="src/js/script.js"></script>
+    <script defer type="module" src="src/js/script.js"></script>
 </head>
 <body>
     <header class="header">
@@ -29,8 +29,10 @@
         </a>
         <nav class="main-nav">
             <ul class="main-nav-list">
+                <li><a class="main-nav-link" href="src/pages/upload.html">Upload Song</a></li>
                 <li><a class="main-nav-link" href="#">Dashboard</a></li>
                 <li><a class="main-nav-link" href="src/pages/login.html">Login</a></li>
+                <li><a class="main-nav-link" href="src/pages/register.html">Register</a></li>
             </ul>
         </nav>
     </header>
@@ -106,5 +108,13 @@
 
         </div>
     </section>
+
+    <footer class="footer">
+        <p class="copyright">
+            Copyright &copy; <span class="year">2027</span> by Soound Now.
+            All rights reserved.
+        </p>
+    </footer>
 </body>
 </html>
+
