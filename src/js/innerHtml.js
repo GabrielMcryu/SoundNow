@@ -4,7 +4,7 @@ export const loggedInNavUI = () => {
     let html = `
         <ul class="main-nav-list">
             <li><a class="main-nav-link" href="javascript:" id="upload">Upload Song</a></li>
-            <li><a class="main-nav-link" href="#">Dashboard</a></li>
+            <li><a class="main-nav-link" href="javascript:" id="dashboard">Dashboard</a></li>
             <li><a class="main-nav-link logout" href="index.html">Logout</a></li>
         </ul>
     `;
@@ -15,9 +15,9 @@ export const loggedOutNavUI = () => {
     let html = `
         <ul class="main-nav-list">
             <li><a class="main-nav-link" href="javascript:" id="upload">Upload Song</a></li>
-            <li><a class="main-nav-link" href="#">Dashboard</a></li>
-            <li><a class="main-nav-link" href="src/pages/login.html">Login</a></li>
-            <li><a class="main-nav-link" href="src/pages/register.html">Register</a></li>
+            <li><a class="main-nav-link" href="javascript:" id="dashboard">Dashboard</a></li>
+            <li><a class="main-nav-link" href="javascript:" id="login">Login</a></li>
+            <li><a class="main-nav-link" href="javascript:" id="register">Register</a></li>
         </ul>
     `;
     return html;
@@ -114,6 +114,48 @@ export const uploadUI = () => {
                 <input class="input-field input-btn" type="file" name="song" accept="audio/mp3">
 
                 <input class="submit-btn" type="submit" value="Upload">
+            </form>
+        </div>
+    </div>
+    `;
+    return html;
+}
+
+export const loginUI = () => {
+    let html = `
+    <div class="container login">
+        <div class="form">
+            <h2 class="form-header">Login</h2>
+            <form action="" id="login-form">
+                <label class="form-label">Email:</label>
+                <input class="input-field" type="text" name="email">
+
+                <label class="form-label">Password:</label>
+                <input class="input-field" type="password" name="password">
+
+                <input class="submit-btn" type="submit" value="Login">
+            </form>
+            <span style="text-align: center;">OR</span>
+            <button id="google-sign-in">Sign In With Google</button>
+        </div>
+    </div>
+    `;
+    return html
+}
+
+export const registerUI = () => {
+    let html = `
+    <div class="container register" id="registration">
+        <div class="form">
+            <h2 class="form-header">Register</h2>
+            <form action="" id="register-form">
+                <label class="form-label">Email:</label>
+                <input class="input-field" type="text" name="email">
+
+                <label class="form-label">Password:</label>
+                <input class="input-field" type="password" name="password">
+
+                <input class="submit-btn" type="submit" value="Register">
             </form>
         </div>
     </div>
