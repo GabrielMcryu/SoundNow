@@ -103,15 +103,18 @@ export const uploadUI = () => {
     <div class="container upload">
         <div class="form">
             <h2 class="form-header">Upload a Song</h2>
-            <form action="" id="login-form">
+            <form action="" id="upload-form">
                 <label class="form-label">Song Name:</label>
-                <input class="input-field" type="text" name="song-name">
+                <input class="input-field" type="text" name="songName">
+
+                <label class="form-label">Artist Name:</label>
+                <input class="input-field" type="text" name="artistName">
 
                 <label class="form-label">Upload Song Image:</label>
-                <input class="input-field input-btn" type="file" name="song-image" accept="image/png, image/jpeg">
+                <input class="input-field input-btn" type="file" name="songImage" accept="image/png, image/jpeg">
 
                 <label class="form-label">Upload Song:</label>
-                <input class="input-field input-btn" type="file" name="song" accept="audio/mp3">
+                <input class="input-field input-btn" type="file" name="songAudio" accept="audio/mp3">
 
                 <input class="submit-btn" type="submit" value="Upload">
             </form>

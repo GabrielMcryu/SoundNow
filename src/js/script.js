@@ -1,3 +1,7 @@
+import {
+    convertSongName
+} from './upload.js'
+
 import { 
     dashboardUI, loggedInNavUI, 
     loggedOutNavUI, uploadUI, 
@@ -6,7 +10,9 @@ import {
 
 import { initializeApp } from 'firebase/app'
 import {
-    getFirestore, collection, getDocs
+    getFirestore, collection, 
+    getDocs, doc, setDoc,
+    updateDoc
 } from 'firebase/firestore'
 import firebaseConfig from './config.js'
 import {
@@ -16,11 +22,19 @@ import {
     createUserWithEmailAndPassword
 } from 'firebase/auth'
 
+import {
+    getStorage, ref as sRef,
+    uploadBytesResumable, getDownloadURL
+} from 'firebase/storage'
 
 initializeApp(firebaseConfig);
 
 const auth = getAuth();
 const provider = new GoogleAuthProvider();
+
+const db = getFirestore();
+
+const storage = getStorage();
 
 const navigation = document.querySelector('#nav');
 const sectionTag = document.querySelector('#section');
@@ -77,6 +91,7 @@ const registerUser = function(email, password) {
     });
 }
 
+///////////////////////////////////////
 // UI
 const navUI = function(isloggedIn) {
     navigation.innerHTML = '';
@@ -108,7 +123,7 @@ const navUI = function(isloggedIn) {
 
         dashboard = document.querySelector('#dashboard');
         dashboard.addEventListener('click', () => {
-            indexUI();
+            renderIndex();
         });
     } else {
         html = loggedOutNavUI();
@@ -131,7 +146,7 @@ const navUI = function(isloggedIn) {
 
         dashboard = document.querySelector('#dashboard');
         dashboard.addEventListener('click', () => {
-            indexUI();
+            renderIndex();
         });
     }
 }
@@ -144,6 +159,17 @@ const sectionUI = function(sectionName, isLoggedIn) {
     } else if(sectionName === "upload") {
         let html = uploadUI();
         sectionTag.insertAdjacentHTML('afterbegin', html);
+
+        const uploadForm = document.querySelector('#upload-form');
+        uploadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const songName = uploadForm.songName.value;
+            const artistName = uploadForm.artistName.value;
+            const songImage = uploadForm.songImage.files[0];
+            const songAudio = uploadForm.songAudio.files[0];
+            UploadToStorage(songName, artistName, songImage, songAudio);
+        });
+
     } else if(sectionName === "login") {
         let html = loginUI();
         sectionTag.insertAdjacentHTML('afterbegin', html);
@@ -194,7 +220,81 @@ const renderRegister = function() {
     sectionUI(sectionName);
 }
 
-const indexUI = function() {
+////////////////////////////////////////////
+// UPLOAD TRACK TO FIREBASE
+
+async function UploadToStorage(songName, artistName, songImage, songAudio) {
+    const songPath = convertSongName(songName);
+    const imgName = songImage.name;
+    const audioName = songAudio.name;
+
+    const audioMetaData = {
+        contentType: songAudio.type
+    }
+
+    const imageMetaData = {
+        contentType: songImage.type
+    }
+
+    const imageStorageRef = sRef(storage, 'Images/' + imgName);
+    const audioStorageRef = sRef(storage, 'Tracks/' + audioName);
+
+    const imageUploadTask = uploadBytesResumable(imageStorageRef, songImage, imageMetaData);
+    const audioUploadTask = uploadBytesResumable(audioStorageRef, songAudio, audioMetaData);
+
+    imageUploadTask.on('state-changed', (snapshot) => {
+        const progress = (snapshot.bytesTransferred /snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+    },
+    (error) => {
+        alert("error: image not uploaded");
+    },
+    () => {
+        getDownloadURL(imageUploadTask.snapshot.ref).then((downloadURL) => {
+            SaveToFirestore(downloadURL, songName, artistName, songPath)
+        })
+    }
+    );
+
+    audioUploadTask.on('state-changed', (snapshot) => {
+        const progress = (snapshot.bytesTransferred /snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+    },
+    (error) => {
+        alert("error: audio not uploaded");
+    },
+    () => {
+        getDownloadURL(audioUploadTask.snapshot.ref).then((downloadURL) => {
+            SaveAudioToFirestore(downloadURL, songPath);
+        })
+    }
+    );
+    
+}   
+
+async function SaveToFirestore(imgUrl, songName, artistName, songPath) {
+    const songRef = doc(db, 'tracks', songPath);
+    await setDoc(songRef, {
+        SongName: songName,
+        ArtistName: artistName,
+        ImageUrl: imgUrl
+    }, { merge: true });
+
+    console.log('image upload finished');
+}
+
+async function SaveAudioToFirestore(songUrl, songPath) {
+    const songRef = doc(db, "tracks", songPath);
+    await updateDoc(songRef, {
+        SongUrl: songUrl
+    }, { merge: true });
+
+    console.log('audio upload finished');
+}
+
+
+
+const renderIndex = function() {
     onAuthStateChanged(auth, (user) => {
         let isLoggedIn
         const sectionName = "main";
@@ -211,7 +311,7 @@ const indexUI = function() {
     });
 }
 
-indexUI();
+renderIndex();
 
 
 
@@ -228,8 +328,9 @@ indexUI();
 
 
 
-// init services
-const db = getFirestore();
+
+
+
 
 // collection ref
 const colRef = collection(db, 'test');
@@ -241,17 +342,3 @@ getDocs(colRef)
 });
 
 
-const test1 = document.querySelector('.test');
-
-const testUI = function(){
-    test1.innerHTML = '';
-    const html = `
-        <ul>
-            <li>food</li>
-            <li>dog</li>
-            <li>weapon</li>
-        </ul>
-    `;
-    test1.insertAdjacentHTML('afterbegin', html);
-}
-// testUI();
