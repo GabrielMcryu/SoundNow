@@ -3,16 +3,16 @@ import {
 } from './upload.js'
 
 import { 
-    dashboardUI, loggedInNavUI, 
+    dashboardUI, loggedInNavUI,
     loggedOutNavUI, uploadUI, 
-    loginUI, registerUI
+    loginUI, registerUI, trackUI
 }from './innerHtml.js'
 
 import { initializeApp } from 'firebase/app'
 import {
     getFirestore, collection, 
     getDocs, doc, setDoc,
-    updateDoc
+    updateDoc, getDoc, query, onSnapshot, QuerySnapshot
 } from 'firebase/firestore'
 import firebaseConfig from './config.js'
 import {
@@ -110,6 +110,7 @@ const navUI = function(isloggedIn) {
             signOut(auth)
                 .then(() => {
                     console.log('the user has signed out');
+                    renderIndex();
                 })
                 .catch((err) => {
                     console.log(err.message);
@@ -151,11 +152,12 @@ const navUI = function(isloggedIn) {
     }
 }
 
-const sectionUI = function(sectionName, isLoggedIn) {
+const sectionUI = function(sectionName, trackData = null) {
     sectionTag.innerHTML = '';
     if (sectionName === "main") {
-        let html = dashboardUI();
-        sectionTag.insertAdjacentHTML('afterbegin', html);
+        // let html = dashboardUI();
+        // sectionTag.insertAdjacentHTML('afterbegin', html);
+        getTracksFromFirestore();
     } else if(sectionName === "upload") {
         let html = uploadUI();
         sectionTag.insertAdjacentHTML('afterbegin', html);
@@ -196,7 +198,12 @@ const sectionUI = function(sectionName, isLoggedIn) {
             const password = registerForm.password.value;
             registerUser(email, password);
         });
-    } else {
+    } else if(sectionName === "track") {
+        let html = trackUI(trackData);
+        sectionTag.insertAdjacentHTML('afterbegin', html);
+    }
+    
+     else {
         console.log("hello world");
     }
 }
@@ -218,6 +225,11 @@ const renderLogin = function() {
 const renderRegister = function() {
     const sectionName = "register";
     sectionUI(sectionName);
+}
+
+const renderTrack = function(trackData) {
+    const sectionName = "track";
+    sectionUI(sectionName, trackData);
 }
 
 ////////////////////////////////////////////
@@ -292,6 +304,60 @@ async function SaveAudioToFirestore(songUrl, songPath) {
     console.log('audio upload finished');
 }
 
+///////////////////////////////////////////
+// GET TRACKS FROM FIRESTORE
+
+const getTracksFromFirestore = function() {
+    const q = query(collection(db, "tracks"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        let tracks = [];
+        snapshot.forEach((doc) => {
+            tracks.push(doc.data());
+        });
+        renderMain(tracks);
+    });
+}
+
+async function getTrackFromFirestore(trackPath) {
+    const docRef = doc(db, "tracks", trackPath);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        const trackData = docSnap.data();
+        renderTrack(trackData);
+        
+    } else {
+        console.log("No such document!");
+    }
+}
+
+const renderMain = function(tracks) {
+    sectionTag.innerHTML = '';
+    tracks.forEach(function (track) {
+        let html = `
+        <div class="container-track track">
+            <div class="track-details">
+                <img class="track-image" id="track-image" src="${track.ImageUrl}" alt="">
+                <div class="track-description">
+                    <h2>${track.SongName}</h2>
+                    <p>${track.ArtistName}</p>
+                </div>
+                <div class="track-choice">
+                    <button class="btn-track-choice" id="btn-choice" value="${track.SongName}">Play</button>
+                </div>
+            </div>
+        </div>
+        `;
+        sectionTag.insertAdjacentHTML('afterbegin', html);
+        const btnChoice = document.querySelector('#btn-choice');
+        btnChoice.addEventListener('click', (e) => {
+            const trackName = btnChoice.value;
+            const trackPath = convertSongName(trackName);
+            getTrackFromFirestore(trackPath);
+        });
+    });
+    
+}
 
 
 const renderIndex = function() {
@@ -301,11 +367,11 @@ const renderIndex = function() {
         if(user) {
             isLoggedIn = true;
             navUI(isLoggedIn);
-            sectionUI(sectionName, isLoggedIn);
+            sectionUI(sectionName);
         } else {
             isLoggedIn = false;
             navUI(isLoggedIn);
-            sectionUI(sectionName, isLoggedIn);
+            sectionUI(sectionName);
         }
 
     });
@@ -315,6 +381,38 @@ renderIndex();
 
 
 
+async function getaDoc() {
+    const docRef = doc(db, "tracks", "hello-world");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data());
+        console.log(docSnap.data().SongName);
+        console.log(docSnap.data().ArtistName);
+        console.log(docSnap.data().SongUrl);
+        console.log(docSnap.data().ImageUrl);
+    } else {
+        console.log("No such document!");
+    }
+}
+// getaDoc();
+
+
+
+const getAllTheDocs = function() {
+    const q = query(collection(db, "tracks"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        let tracks = [];
+        snapshot.forEach((doc) => {
+            tracks.push(doc);
+        })
+        tracks.forEach(track => {
+            console.log(track);
+        })
+    });
+}
+
+// getAllTheDocs();
 
 
 
@@ -323,22 +421,5 @@ renderIndex();
 
 
 
-
-
-
-
-
-
-
-
-
-// collection ref
-const colRef = collection(db, 'test');
-
-// get collection data
-getDocs(colRef)
-    .then((snapshot) => {
-        console.log(snapshot.docs);
-});
 
 

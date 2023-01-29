@@ -5,7 +5,7 @@ export const loggedInNavUI = () => {
         <ul class="main-nav-list">
             <li><a class="main-nav-link" href="javascript:" id="upload">Upload Song</a></li>
             <li><a class="main-nav-link" href="javascript:" id="dashboard">Dashboard</a></li>
-            <li><a class="main-nav-link logout" href="index.html">Logout</a></li>
+            <li><a class="main-nav-link logout" href="javascript:">Logout</a></li>
         </ul>
     `;
     return html;
@@ -23,18 +23,13 @@ export const loggedOutNavUI = () => {
     return html;
 }
 
-export const dashboardUI = () => {
+export const trackUI = (trackData) => {
     let html = `
-    <div class="container track">
-        <div class="track-details">
-            <img class="track-image" src="${trackImage}" alt="">
-            <div class="track-description">
-                <h2>Song Name</h2>
-                <p>By: Artist</p>
-            </div>
+    <div class="container">
+        <div class="image-view">
+            <img src="${trackData.ImageUrl}" alt="" class="my-image">
         </div>
-
-        <div class="track-song">
+        <div class="track-song track-shadow">
             <button class="track-play">
                 <i class="fas fa-play"></i>
             </button>
@@ -59,40 +54,6 @@ export const dashboardUI = () => {
             
             <span class="duration-time">04:10</span>
         </div>
-    </div>
-
-    <div class="container track">
-        <div class="track-details">
-            <img class="track-image" src="${trackImage}" alt="">
-            <div class="track-description">
-                <h2>Song Name</h2>
-                <p>By: Artist</p>
-            </div>
-        </div>
-
-        <div class="track-song">
-            <button class="track-play">
-                <i class="fas fa-play"></i>
-            </button>
-            <div class="track-vol">
-                <i class="fas fa-volume-up" id="volume-icon"></i>
-            </div>
-            <input 
-            type="range"
-            id="track-volume"
-            min="0"
-            max="100"
-            value="50">
-            <span class="current-time">00:12</span>
-            <input 
-            type="range" 
-            class="duration-slider"
-            min="0"
-            max="100"
-            value="0">
-            <span class="duration-time">04:10</span>
-        </div>
-
     </div>
     `;
     return html;

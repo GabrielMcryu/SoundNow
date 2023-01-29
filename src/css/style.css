@@ -53,6 +53,7 @@ h1 {
 .section-music {
     background-color: #fff;
     padding: 4.8rem 9.6rem 9.6rem 9.6rem;
+    min-height: 75vh;
 }
 
 .track {
@@ -62,10 +63,10 @@ h1 {
 
 .track-details {
     display: flex;
-    column-gap: 2rem;
     align-items: center;
-    justify-content: left;
-    padding-top: 2.4rem;
+    column-gap: 2rem;
+    margin-right: 0;
+    justify-content: space-between;
 }
 
 .track-image {
@@ -145,7 +146,28 @@ input[type="range"] {
 
 .duration input[type="range"] {
     width: 100%;
-  }
+}
+
+.track-choice {
+    display: flex;
+    flex-grow: 1;
+    justify-content: right;
+}
+
+.btn-track-choice {
+    font-size: 1.8rem;
+    color: #fff;
+    background-color: #f76707;
+    border-radius: 5px;
+    border: none;
+    padding: 1.8rem 3.2rem;
+    margin-bottom: 1.2rem;
+}
+
+.btn-track-choice:hover {
+    background-color: #d9480f;
+    transition: all 0.3s;
+}
 
 /* ********************************************* */
 /* LOGIN SECTION */
@@ -173,4 +195,27 @@ input[type="range"] {
 
 .input-btn {
     font-size: 1.8rem;
+}
+
+/* ********************************************* */
+/* PLAY TRACK SECTION */
+/* ********************************************* */
+.image-view {
+    box-shadow: 0 1.2rem 3.2rem rgba(0, 0, 0, 0.09);
+    background-color: #212529;
+    padding: 4.8rem 0;
+}
+
+.my-image {
+    display: block;
+    margin: 0 auto;
+    max-width: 100rem;
+    /* margin-bottom: 2.4rem; */
+}
+
+.track-shadow {
+    box-shadow: 0 1.2rem 3.2rem rgba(0, 0, 0, 0.09);
+    padding: 3.2rem;
+    border: 1px solid #f76707;
+    border-top: none;
 }
