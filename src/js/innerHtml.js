@@ -30,21 +30,23 @@ export const trackUI = (trackData) => {
             <img src="${trackData.ImageUrl}" alt="" class="my-image">
         </div>
         <div class="track-song track-shadow">
-            <button class="track-play">
+            <button class="track-play" id="play">
                 <i class="fas fa-play"></i>
             </button>
 
-            <div class="track-vol">
+            <div class="track-vol" id="track-vol-div">
                 <i class="fas fa-volume-up" id="volume-icon"></i>
             </div>
 
             <input 
             type="range"
-            id="track-volume"
+            id="track-volume-slider"
             min="0"
             max="100"
             value="50">
+
             <span class="current-time">00:12</span>
+
             <input 
             type="range" 
             class="duration-slider"

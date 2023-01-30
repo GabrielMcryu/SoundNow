@@ -39,6 +39,17 @@ const storage = getStorage();
 const navigation = document.querySelector('#nav');
 const sectionTag = document.querySelector('#section');
 
+let track = document.createElement("audio");
+let play;
+let timer;
+let slider;
+let VolIconDiv;
+let volumeIcon;
+let volumeSlider;
+let trackCurrentTime;
+let trackDuration;
+let songIsPlaying = false;
+
 //////////////////////////////////////////////
 // AUTHENTICATION
 
@@ -201,6 +212,26 @@ const sectionUI = function(sectionName, trackData = null) {
     } else if(sectionName === "track") {
         let html = trackUI(trackData);
         sectionTag.insertAdjacentHTML('afterbegin', html);
+
+        const songUrl = trackData.SongUrl;
+
+        play = document.querySelector('#play');
+        trackCurrentTime = document.querySelector('.current-time');
+        trackDuration = document.querySelector('.duration-time');
+        slider = document.querySelector('.duration-slider');
+
+        VolIconDiv = document.querySelector('#track-vol-div');
+        volumeSlider = document.querySelector('#track-volume-slider');
+        volumeIcon = document.querySelector('#volume-icon');
+
+        // all track event listeners
+        play.addEventListener("click", justPlay);
+        VolIconDiv.addEventListener("click", muteSound);
+        volumeSlider.addEventListener("change", changeVolume);
+        slider.addEventListener("change", changeDuration);
+        track.addEventListener('timeupdate', songTimeUpdate);
+        console.log(songUrl)
+        loadTrack(songUrl);
     }
     
      else {
@@ -359,7 +390,115 @@ const renderMain = function(tracks) {
     
 }
 
+/////////////////////////////////////
+// PLAY OPTIONS
 
+const loadTrack = function(songUrl) {
+    clearInterval(timer);
+    resetSlider();
+    track.src = songUrl;
+
+    track.load();
+
+    timer = setInterval(updateSlider, 1000);
+}
+
+// Play song or Pause song
+function justPlay() {
+    if (songIsPlaying == false) {
+        playSong();
+    } else {
+        pauseSong();
+    }
+}
+
+// Reset Slider
+function resetSlider() {
+    slider.value = 0;
+}
+
+// Play Song
+function playSong() {
+    track.play();
+    songIsPlaying = true;
+    play.innerHTML = '<i class="fas fa-pause"></i>'
+}
+
+// Pause Song
+function pauseSong() {
+    track.pause();
+    songIsPlaying = false;
+    play.innerHTML = '<i class="fas fa-play"></i>'
+}
+
+// Mute Sound
+function muteSound() {
+    VolIconDiv.innerHTML = "<i class='fas fa-volume-mute' id='volume-icon'></i>";
+    track.volume = 0;
+    volumeSlider.value = 0;
+}
+
+// Change Volume
+function changeVolume() {
+    track.volume = volumeSlider.value / 100;
+    if (volumeSlider.value < 1) {
+        VolIconDiv.innerHTML = "<i class='fas fa-volume-mute' id='volume-icon'></i>";
+    } else {
+        VolIconDiv.innerHTML = "<i class='fas fa-volume-up' id='volume-icon'></i>"
+    }
+}
+
+// Change Duration
+function changeDuration() {
+    let sliderPosition = track.duration * (slider.value / 100);
+    track.currentTime = sliderPosition;
+}
+
+// Update Slider
+function updateSlider() {
+    let position = 0;
+
+    if(!isNaN(track.duration)) {
+        position = track.currentTime * (100 / track.duration);
+        slider.value = position;
+    }
+
+    if (track.ended) {
+        play.innerHTML = '<i class="fas fa-play"></i>';
+    }
+}
+
+// Update Current song time
+function songTimeUpdate() {
+    if (track.duration) {
+        let curmins = Math.floor(track.currentTime / 60);
+        let cursecs = Math.floor(track.currentTime - curmins * 60);
+        let durmins = Math.floor(track.duration / 60);
+        let dursecs = Math.floor(track.duration - durmins * 60);
+    
+        if (dursecs < 10) {
+            dursecs = "0" + dursecs;
+        }
+        if (durmins < 10) {
+            durmins = "0" + durmins;
+        }
+        if (curmins < 10) {
+            curmins = "0" + curmins;
+        }
+        if (cursecs < 10) {
+            cursecs = "0" + cursecs;
+        }
+        trackCurrentTime.innerHTML = curmins + ":" + cursecs;
+        trackDuration.innerHTML = durmins + ":" + dursecs;
+       
+    } else {
+        trackCurrentTime.innerHTML = "00" + ":" + "00";
+        trackDuration.innerHTML = "00" + ":" + "00";
+    }
+}
+
+
+// load main page
 const renderIndex = function() {
     onAuthStateChanged(auth, (user) => {
         let isLoggedIn
