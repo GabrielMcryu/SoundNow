@@ -128,3 +128,19 @@ export const registerUI = () => {
     `;
     return html;
 }
+
+export const searchUI = () => {
+    let html = `
+    <div class="search-option">
+        <input type="text" name="search" placeholder="Search here" id="search-input">
+        <select name="choices" id="search-choice">
+            <option value="all">All</option>
+            <option value="artist">Artist</option>
+            <option value="track-name">Track</option>
+        </select>
+        <button id="search-btn">Search</button>
+    </div>
+    <br><br>
+    `;
+    return html
+}

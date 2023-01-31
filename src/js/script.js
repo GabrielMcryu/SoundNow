@@ -5,7 +5,7 @@ import {
 import { 
     dashboardUI, loggedInNavUI,
     loggedOutNavUI, uploadUI, 
-    loginUI, registerUI, trackUI
+    loginUI, registerUI, trackUI, searchUI
 }from './innerHtml.js'
 
 import { initializeApp } from 'firebase/app'
@@ -349,6 +349,42 @@ const getTracksFromFirestore = function() {
     });
 }
 
+const getTrackBySongName = function(songName) {
+    const q = query(collection(db, "tracks"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        let tracks = [];
+        snapshot.forEach((doc) => {
+            if(doc.data().SongName.toLowerCase().includes(songName)) {
+                tracks.push(doc.data());
+            }
+        });
+        if(tracks.length < 1) {
+            const errorMessage = '<p>No such Track Name found.</p>';
+            renderNullSearch(errorMessage);
+        } else {
+            renderMain(tracks)
+        }
+    })
+}
+
+const getTrackByArtistName = function(artistName) {
+    const q = query(collection(db, "tracks"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        let tracks = [];
+        snapshot.forEach((doc) => {
+            if(doc.data().ArtistName.toLowerCase().includes(artistName)) {
+                tracks.push(doc.data());
+            }
+        });
+        if(tracks.length < 1) {
+            const errorMessage = '<p>No such Artist Name found.</p>';
+            renderNullSearch(errorMessage);
+        } else {
+            renderMain(tracks)
+        }
+    })
+}
+
 async function getTrackFromFirestore(trackPath) {
     const docRef = doc(db, "tracks", trackPath);
     const docSnap = await getDoc(docRef);
@@ -387,7 +423,52 @@ const renderMain = function(tracks) {
             getTrackFromFirestore(trackPath);
         });
     });
+
+    let html = searchUI();
+    sectionTag.insertAdjacentHTML('afterbegin', html);
+
+    const btnSearch = document.querySelector('#search-btn');
+    const searchField = document.querySelector('#search-input');
+    const searchChoices = document.querySelector('#search-choice');
+
+    btnSearch.addEventListener('click', (e) => {
+        e.preventDefault();  
+        if(searchChoices.value === 'all') {
+            renderIndex();
+        } else if(searchField.value.trim() === '') {
+            renderIndex();
+        } else if(searchChoices.value === 'artist') {
+            getTrackByArtistName(searchField.value.trim().toLowerCase());
+        } else if(searchChoices.value === 'track-name') {
+            getTrackBySongName(searchField.value.trim().toLowerCase());
+        }
+    });
     
+}
+
+const renderNullSearch = function(errorMessage) {
+    sectionTag.innerHTML = '';
+    sectionTag.insertAdjacentHTML('afterbegin', errorMessage);
+
+    let html = searchUI();
+    sectionTag.insertAdjacentHTML('afterbegin', html);
+
+    const btnSearch = document.querySelector('#search-btn');
+    const searchField = document.querySelector('#search-input');
+    const searchChoices = document.querySelector('#search-choice');
+
+    btnSearch.addEventListener('click', (e) => {
+        e.preventDefault();  
+        if(searchChoices.value === 'all') {
+            renderIndex();
+        } else if(searchField.value.trim() === '') {
+            renderIndex();
+        } else if(searchChoices.value === 'artist') {
+            getTrackByArtistName(searchField.value.trim().toLowerCase());
+        } else if(searchChoices.value === 'track-name') {
+            getTrackBySongName(searchField.value.trim().toLowerCase());
+        }
+    });
 }
 
 /////////////////////////////////////
@@ -465,6 +546,7 @@ function updateSlider() {
 
     if (track.ended) {
         play.innerHTML = '<i class="fas fa-play"></i>';
+        loadTrack(track.src);
     }
 }
 
