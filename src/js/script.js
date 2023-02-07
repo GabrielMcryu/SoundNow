@@ -3,16 +3,17 @@ import {
 } from './upload.js'
 
 import { 
-    dashboardUI, loggedInNavUI,
-    loggedOutNavUI, uploadUI, 
-    loginUI, registerUI, trackUI, searchUI
+    loggedInNavUI, loggedOutNavUI, uploadUI, 
+    loginUI, registerUI, trackUI, searchUI,
+    addCommentUI, commentsUI
 }from './innerHtml.js'
 
 import { initializeApp } from 'firebase/app'
 import {
     getFirestore, collection, 
-    getDocs, doc, setDoc,
-    updateDoc, getDoc, query, onSnapshot, QuerySnapshot
+    getDocs, doc, setDoc, addDoc,
+    updateDoc, getDoc, query, onSnapshot, 
+    serverTimestamp, orderBy
 } from 'firebase/firestore'
 import firebaseConfig from './config.js'
 import {
@@ -163,11 +164,9 @@ const navUI = function(isloggedIn) {
     }
 }
 
-const sectionUI = function(sectionName, trackData = null) {
+const sectionUI = function(sectionName, trackData = null, commentsData = null) {
     sectionTag.innerHTML = '';
     if (sectionName === "main") {
-        // let html = dashboardUI();
-        // sectionTag.insertAdjacentHTML('afterbegin', html);
         getTracksFromFirestore();
     } else if(sectionName === "upload") {
         let html = uploadUI();
@@ -210,7 +209,31 @@ const sectionUI = function(sectionName, trackData = null) {
             registerUser(email, password);
         });
     } else if(sectionName === "track") {
-        let html = trackUI(trackData);
+        // Comments UI
+        commentsData.forEach(function (commentData) {
+            let name = commentData.Name;
+            let comment = commentData.Comment;
+            let commentDate = commentData.createdAt.toDate().toDateString();
+            let html = commentsUI(name, comment, commentDate);
+            sectionTag.insertAdjacentHTML('afterbegin', html);
+        });
+
+        let html = addCommentUI();
+        sectionTag.insertAdjacentHTML('afterbegin', html);
+
+        // Comments Form UI
+        let songName = trackData.SongName;
+        addCommentForm = document.querySelector('#upload-comment');
+        addCommentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = addCommentForm.name.value;
+            const comment = addCommentForm.comment.value;
+            addCommentToFirestore(name, comment, songName);
+            addCommentForm.reset();
+        });
+
+        // Track UI
+        html = trackUI(trackData);
         sectionTag.insertAdjacentHTML('afterbegin', html);
 
         const songUrl = trackData.SongUrl;
@@ -230,11 +253,9 @@ const sectionUI = function(sectionName, trackData = null) {
         volumeSlider.addEventListener("change", changeVolume);
         slider.addEventListener("change", changeDuration);
         track.addEventListener('timeupdate', songTimeUpdate);
-        console.log(songUrl)
         loadTrack(songUrl);
-    }
-    
-     else {
+
+    } else {
         console.log("hello world");
     }
 }
@@ -258,9 +279,9 @@ const renderRegister = function() {
     sectionUI(sectionName);
 }
 
-const renderTrack = function(trackData) {
+const renderTrack = function(trackData, comments) {
     const sectionName = "track";
-    sectionUI(sectionName, trackData);
+    sectionUI(sectionName, trackData, comments);
 }
 
 ////////////////////////////////////////////
@@ -391,12 +412,42 @@ async function getTrackFromFirestore(trackPath) {
 
     if (docSnap.exists()) {
         const trackData = docSnap.data();
-        renderTrack(trackData);
+        getCommentsFromFirestore(trackData);
         
     } else {
         console.log("No such document!");
     }
 }
+
+///////////////////////////////////////////
+// GET AND ADD COMMENTS TO FIRESTORE
+const addCommentToFirestore = function(name, comment, songName) {
+        const songRef = collection(db, 'comments');
+        addDoc(songRef, {
+            Name: name,
+            Comment: comment,
+            SongName: songName,
+            createdAt: serverTimestamp()
+        }).then(() => {
+            console.log('comment added');
+        });
+}
+
+const getCommentsFromFirestore = function(trackData) {
+    const colRef = collection(db, 'comments');
+    const q = query(colRef, orderBy('createdAt'));
+    const songName = trackData.SongName;
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        let comments = [];
+        snapshot.forEach((doc) => {
+            if(doc.data().SongName === songName) {
+                comments.push(doc.data());
+            }
+        });
+        renderTrack(trackData, comments);
+    });
+}
+
 
 const renderMain = function(tracks) {
     sectionTag.innerHTML = '';

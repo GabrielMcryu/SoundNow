@@ -144,3 +144,33 @@ export const searchUI = () => {
     `;
     return html
 }
+
+export const addCommentUI = () => {
+    let html = `
+    <br><br>
+    <div class="comment-form">
+        <h2>Add a Comment</h2>
+        <form action="" id="upload-comment">
+            <label>Name:</label>
+            <input type="text" name="name">
+        
+            <label >Comment</label>
+            <textarea name="comment" cols="30" rows="10"></textarea>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <br><br>
+    `;
+    return html;
+}
+
+export const commentsUI = (name, comment, commentDate) => {
+    let html = `
+    <div class="comment-section">
+        <p>${name} ${commentDate}</p>
+        <p>${comment}</p>
+    </div>
+    <br><br>
+    `;
+    return html;
+}
