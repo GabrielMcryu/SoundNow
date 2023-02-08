@@ -18,9 +18,9 @@ import {
 import firebaseConfig from './config.js'
 import {
     getAuth, signInWithEmailAndPassword, 
-    onAuthStateChanged, signOut,
-    GoogleAuthProvider, signInWithRedirect,
-    createUserWithEmailAndPassword
+    onAuthStateChanged, signOut, getRedirectResult,
+    GoogleAuthProvider, signInWithRedirect, TwitterAuthProvider,
+    createUserWithEmailAndPassword, FacebookAuthProvider, signInAnonymously
 } from 'firebase/auth'
 
 import {
@@ -31,7 +31,9 @@ import {
 initializeApp(firebaseConfig);
 
 const auth = getAuth();
+const fbProvider = new FacebookAuthProvider();
 const provider = new GoogleAuthProvider();
+const twProvider = new TwitterAuthProvider();
 
 const db = getFirestore();
 
@@ -87,6 +89,70 @@ const googleSignIn = function() {
     const email = error.customData.email;
     // The AuthCredential type that was used.
     const credential = GoogleAuthProvider.credentialFromError(error);
+    // ...
+  });
+}
+
+async function faceBookSignIn() {
+    signInWithRedirect(auth, fbProvider);
+
+    getRedirectResult(auth)
+  .then((result) => {
+    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+    const credential = FacebookAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+
+    const user = result.user;
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+  }).catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // The email of the user's account used.
+    const email = error.customData.email;
+    // AuthCredential type that was used.
+    const credential = FacebookAuthProvider.credentialFromError(error);
+    // ...
+  });
+}
+
+const anonymousSignIn = function() {
+    signInAnonymously(auth)
+  .then(() => {
+    // location.reload();
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ...
+  });
+}
+
+const twitterSignIn = function() {
+    signInWithRedirect(auth, twProvider);
+
+    getRedirectResult(auth)
+  .then((result) => {
+    // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
+    // You can use these server side with your app's credentials to access the Twitter API.
+    const credential = TwitterAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+    const secret = credential.secret;
+    // ...
+
+    // The signed-in user info.
+    const user = result.user;
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+  }).catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // The email of the user's account used.
+    const email = error.customData.email;
+    // The AuthCredential type that was used.
+    const credential = TwitterAuthProvider.credentialFromError(error);
     // ...
   });
 }
@@ -188,6 +254,9 @@ const sectionUI = function(sectionName, trackData = null, commentsData = null) {
 
         const loginForm = document.querySelector('#login-form');
         const googleButton = document.querySelector('#google-sign-in');
+        const faceBookButton = document.querySelector('#facebook-sign-in');
+        const twitterButton = document.querySelector('#twitter-sign-in');
+        const anonymousButton = document.querySelector('#anonymous-sign-in')
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = loginForm.email.value;
@@ -196,6 +265,16 @@ const sectionUI = function(sectionName, trackData = null, commentsData = null) {
         });
         googleButton.addEventListener('click', (e) => {
             googleSignIn();
+        });
+        faceBookButton.addEventListener('click', (e) => {
+            faceBookSignIn();
+        });
+        twitterButton.addEventListener('click', (e) => {
+            // twitterSignIn();
+            console.log('twitter clicked');
+        });
+        anonymousButton.addEventListener('click', (e) => {
+            anonymousSignIn();
         })
     } else if(sectionName === "register") {
         let html = registerUI()

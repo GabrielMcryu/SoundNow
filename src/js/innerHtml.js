@@ -103,6 +103,9 @@ export const loginUI = () => {
             </form>
             <span style="text-align: center;">OR</span>
             <button id="google-sign-in">Sign In With Google</button>
+            <button id="facebook-sign-in">Sign In With Facebook</button>
+            <button id="twitter-sign-in">Sign In With Twitter</button>
+            <button id="anonymous-sign-in">Anonymous Sign In</button>
         </div>
     </div>
     `;
