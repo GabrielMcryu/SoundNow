@@ -255,7 +255,6 @@ const sectionUI = function(sectionName, trackData = null, commentsData = null) {
         const loginForm = document.querySelector('#login-form');
         const googleButton = document.querySelector('#google-sign-in');
         const faceBookButton = document.querySelector('#facebook-sign-in');
-        const twitterButton = document.querySelector('#twitter-sign-in');
         const anonymousButton = document.querySelector('#anonymous-sign-in')
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -268,10 +267,6 @@ const sectionUI = function(sectionName, trackData = null, commentsData = null) {
         });
         faceBookButton.addEventListener('click', (e) => {
             faceBookSignIn();
-        });
-        twitterButton.addEventListener('click', (e) => {
-            // twitterSignIn();
-            console.log('twitter clicked');
         });
         anonymousButton.addEventListener('click', (e) => {
             anonymousSignIn();

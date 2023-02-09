@@ -101,11 +101,15 @@ export const loginUI = () => {
 
                 <input class="submit-btn" type="submit" value="Login">
             </form>
-            <span style="text-align: center;">OR</span>
-            <button id="google-sign-in">Sign In With Google</button>
-            <button id="facebook-sign-in">Sign In With Facebook</button>
-            <button id="twitter-sign-in">Sign In With Twitter</button>
-            <button id="anonymous-sign-in">Anonymous Sign In</button>
+            <div class="form-text">
+                <p>OR SIGN IN WITH</p>
+            </div>
+            
+            <div class="form-buttons">
+                <button class="button-social button-google" id="google-sign-in">Google</button>
+                <button class="button-social button-facebook" id="facebook-sign-in">Facebook</button>
+                <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button>
+            </div>
         </div>
     </div>
     `;
@@ -135,13 +139,13 @@ export const registerUI = () => {
 export const searchUI = () => {
     let html = `
     <div class="search-option">
-        <input type="text" name="search" placeholder="Search here" id="search-input">
-        <select name="choices" id="search-choice">
+        <input class="search-field" type="text" name="search" placeholder="Search here" id="search-input">
+        <select class="select-field" name="choices" id="search-choice">
             <option value="all">All</option>
             <option value="artist">Artist</option>
             <option value="track-name">Track</option>
         </select>
-        <button id="search-btn">Search</button>
+        <button class="btn-search" id="search-btn">Search</button>
     </div>
     <br><br>
     `;
@@ -150,16 +154,15 @@ export const searchUI = () => {
 
 export const addCommentUI = () => {
     let html = `
-    <br><br>
     <div class="comment-form">
         <h2>Add a Comment</h2>
         <form action="" id="upload-comment">
-            <label>Name:</label>
-            <input type="text" name="name">
+            <label class="form-label">Name:</label>
+            <input class="input-field" type="text" name="name">
         
-            <label >Comment</label>
-            <textarea name="comment" cols="30" rows="10"></textarea>
-            <input type="submit" value="Submit">
+            <label class="form-label" >Comment</label>
+            <textarea class="comment-area" name="comment" cols="30" rows="3"></textarea>
+            <input class="submit-btn" type="submit" value="Submit">
         </form>
     </div>
     <br><br>
@@ -170,8 +173,8 @@ export const addCommentUI = () => {
 export const commentsUI = (name, comment, commentDate) => {
     let html = `
     <div class="comment-section">
-        <p>${name} ${commentDate}</p>
-        <p>${comment}</p>
+        <p class="text-sub"><span class="c-name">${name}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-date">${commentDate}</span></p>
+        <p class="text-main">${comment}</p>
     </div>
     <br><br>
     `;

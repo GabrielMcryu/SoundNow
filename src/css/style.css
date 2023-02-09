@@ -222,9 +222,142 @@ input[type="range"] {
 }
 
 /* ********************************************* */
-/* PLAY TRACK SECTION */
+/* FORM SECTION */
 /* ********************************************* */
+.form-text {
+    padding: 1.2rem 0;
+}
+
+.form-text p {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.form-buttons {
+    margin-top: 0.8rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 0.8rem;
+}
+
+.button-social {
+    font-size: 1.8rem;
+    width: 100%;
+    border: none;
+    padding: 1.2rem 0;
+    color: white;
+    cursor: pointer;
+}
+
+.button-google {
+    background-color: #f03e3e;
+}
+
+.button-google:hover {
+    background-color: #c92a2a;
+    transition: all 0.3s;
+}
+
+
+.button-facebook {
+    background-color: #1c7ed6;
+}
+
+.button-facebook:hover {
+    background-color: #1864ab;
+    transition: all 0.3s;
+}
+
+.button-anonymous {
+    background-color: #495057;
+}
+
+.button-anonymous:hover {
+    background-color: #212529;
+    transition: all 0.3s;
+}
+
+/* ********************************************* */
+/* SEARCH SECTION */
+/* ********************************************* */
+.search-option {
+    display: grid;
+    grid-template-columns: 6fr 1fr 1fr;
+    column-gap: 1.2rem;
+}
+
+.search-field {
+    width: 100%;
+    padding: 1.2rem;
+    border-radius: 5px;
+    font-size: 1.8rem;
+}
+
+.select-field {
+    font-size: 1.8rem;
+    padding: 0 0.8rem;
+}
+
+.btn-search {
+    border: none;
+    padding: 1.2rem 0;
+    color: white;
+    cursor: pointer;
+    background-color: #f76707;
+    border-radius: 5px;
+}
+
+.btn-search:hover {
+    background-color: #d9480f;
+    transition: all 0.3s;
+}
+
+/* ********************************************* */
+/* COMMENT SECTION */
+/* ********************************************* */
+.comment-form {
+    padding: 3.2rem 3.2rem 2.4rem 3.2rem;
+}
+
+.comment-form h2 {
+    font-size: 3.2rem;
+    color: #f76707;
+    margin-bottom: 1.8rem;
+}
+
+.comment-area {
+    margin-top: 1.8rem;
+    margin-bottom: 1.8rem;
+    width: 100%;
+    padding: 1.2rem;
+    border-radius: 5px;
+    font-size: 1.8rem;
+}
 
 .comment-section {
+    padding: 0.8rem 3.2rem;
+}
+
+.comment-section h2 {
+    font-size: 3.2rem;
+    color: #f76707;
+    margin-bottom: 1.8rem;
+}
+
+.text-sub {
+    font-size: 1.6rem;
+    margin-bottom: 1.2rem;
+}
+
+.text-main {
     font-size: 1.8rem;
+}
+
+.c-name {
+    color: #f76707;
+}
+
+.c-date {
+    color: #adb5bd;
 }
