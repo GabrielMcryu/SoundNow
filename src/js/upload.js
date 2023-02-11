@@ -3,7 +3,3 @@ export const convertSongName = (songName) => {
     return songPath;
     console.log(songPath);
 }
-
-export const hello = async function() {
-    
-}

@@ -61,29 +61,58 @@ export const getTrackFromFirestore = async function(trackPath) {
 }
 
 
-
-
-
-
-
-
-
-
- 
-export const getAllTheDocuments = function() {
-    let tracks = [];
-    const q = query(collection(db, "tracks"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        
-        snapshot.forEach((doc) => {
-            tracks.push(doc);
-        })
-        
+///////////////////////////////////////////
+// GET AND ADD COMMENTS TO FIRESTORE
+export const addCommentToFirestore = async function(name, comment, songName) {
+    const songRef = collection(db, 'comments');
+    await addDoc(songRef, {
+        Name: name,
+        Comment: comment,
+        SongName: songName,
+        createdAt: serverTimestamp()
+    }).then(() => {
+        console.log('comment added');
     });
-    return tracks;
 }
 
-export const getAllTheDocumentes = () => {
-    let h = 'hello world';
-    return h;
+// to be updated
+export const getCommentsFromFirestore2 = async function(trackData) {
+    let comments = [];
+    const colRef = collection(db, 'comments');
+    const q = query(colRef, orderBy('createdAt'));
+    const songName = trackData.SongName;
+    const unsubscribe = onSnapshot(q,async (snapshot) => {
+        snapshot.forEach(async (doc) => {
+            if(doc.data().SongName === songName) {
+                comments.push(doc.data());
+            }
+        });
+        // renderTrack(trackData, comments);
+    });
+    console.log(comments.length);
+    return comments;
+}
+
+
+////////////////////////////////////////////
+// UPLOAD TRACK TO FIREBASE
+
+export async function SaveToFirestore(imgUrl, songName, artistName, songPath) {
+    const songRef = doc(db, 'tracks', songPath);
+    await setDoc(songRef, {
+        SongName: songName,
+        ArtistName: artistName,
+        ImageUrl: imgUrl
+    }, { merge: true });
+
+    console.log('image upload finished');
+}
+ 
+export async function SaveAudioToFirestore(songUrl, songPath) {
+    const songRef = doc(db, "tracks", songPath);
+    await updateDoc(songRef, {
+        SongUrl: songUrl
+    }, { merge: true });
+
+    console.log('audio upload finished');
 }

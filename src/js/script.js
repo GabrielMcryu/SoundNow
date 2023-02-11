@@ -5,7 +5,9 @@ import {
 import {
     getAllTheDocuments, getTracksFromFirestore,
     getTrackBySongName, getTrackByArtistName,
-    getTrackFromFirestore
+    getTrackFromFirestore, addCommentToFirestore,
+    getCommentsFromFirestore2, SaveToFirestore,
+    SaveAudioToFirestore
 } from './firebaseModel.js'
 
 import { 
@@ -311,7 +313,7 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
             e.preventDefault();
             const name = addCommentForm.name.value;
             const comment = addCommentForm.comment.value;
-            addCommentToFirestore(name, comment, songName);
+            addCommentEvent(name, comment, songName);
             addCommentForm.reset();
         });
 
@@ -341,6 +343,10 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
     } else {
         console.log("hello world");
     }
+}
+
+const addCommentEvent = async function(name, comment, songName) {
+    await addCommentToFirestore(name, comment, songName);
 }
 
 const renderUpload = function(isLoggedIn) {
@@ -419,45 +425,13 @@ async function UploadToStorage(songName, artistName, songImage, songAudio) {
     
 }   
 
-async function SaveToFirestore(imgUrl, songName, artistName, songPath) {
-    const songRef = doc(db, 'tracks', songPath);
-    await setDoc(songRef, {
-        SongName: songName,
-        ArtistName: artistName,
-        ImageUrl: imgUrl
-    }, { merge: true });
-
-    console.log('image upload finished');
-}
-
-async function SaveAudioToFirestore(songUrl, songPath) {
-    const songRef = doc(db, "tracks", songPath);
-    await updateDoc(songRef, {
-        SongUrl: songUrl
-    }, { merge: true });
-
-    console.log('audio upload finished');
-}
-
 ///////////////////////////////////////////
 // GET AND ADD COMMENTS TO FIRESTORE
-const addCommentToFirestore = function(name, comment, songName) {
-    const songRef = collection(db, 'comments');
-    addDoc(songRef, {
-        Name: name,
-        Comment: comment,
-        SongName: songName,
-        createdAt: serverTimestamp()
-    }).then(() => {
-        console.log('comment added');
-    });
-}
-
 const getCommentsFromFirestore = function(trackData) {
     const colRef = collection(db, 'comments');
     const q = query(colRef, orderBy('createdAt'));
     const songName = trackData.SongName;
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q,async (snapshot) => {
         let comments = [];
         snapshot.forEach((doc) => {
             if(doc.data().SongName === songName) {
@@ -507,7 +481,9 @@ const renderMain = async function(tracks) {
 
 const trackEvents = async function(trackPath) {
     const trackData = await getTrackFromFirestore(trackPath);
-    getCommentsFromFirestore(trackData)
+    // const comments = await getCommentsFromFirestore2(trackData);
+    getCommentsFromFirestore(trackData);
+    // renderTrack(trackData, comments);
 }
 
 const searchEvents = async function(inputData, searchChoice) {
@@ -550,9 +526,9 @@ const renderNullSearch = function(errorMessage) {
         } else if(searchField.value.trim() === '') {
             renderIndex();
         } else if(searchChoices.value === 'artist') {
-            getTrackByArtistName(searchField.value.trim().toLowerCase());
+            searchEvents(searchField.value.trim().toLowerCase(), 'artist');
         } else if(searchChoices.value === 'track-name') {
-            getTrackBySongName(searchField.value.trim().toLowerCase());
+            searchEvents(searchField.value.trim().toLowerCase(), 'track-name');
         }
     });
 }
@@ -705,20 +681,6 @@ async function getaDoc() {
 // getaDoc();
 
 
-
-
-
-
-testDocButton = document.querySelector('#test-doc');
-testDocButton.addEventListener('click', () => {
-    // getDocs();
-    hellos();
-});
-
-function hellos() {
-    let h = getAllTheDocuments();
-    console.log(h)
-}
 
 
 
