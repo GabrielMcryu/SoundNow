@@ -23,6 +23,24 @@ export const loggedOutNavUI = () => {
     return html;
 }
 
+export const dashboardUI = (track) => {
+    let html = `
+    <div class="container-track track">
+        <div class="track-details">
+            <img class="track-image" id="track-image" src="${track.ImageUrl}" alt="">
+            <div class="track-description">
+                <h2>${track.SongName}</h2>
+                <p>${track.ArtistName}</p>
+            </div>
+            <div class="track-choice">
+                <button class="btn-track-choice" id="btn-choice" value="${track.SongName}">Play</button>
+            </div>
+        </div>
+    </div>
+    `;
+    return html;
+}
+
 export const trackUI = (trackData) => {
     let html = `
     <div class="container">

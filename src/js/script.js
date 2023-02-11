@@ -2,10 +2,16 @@ import {
     convertSongName
 } from './upload.js'
 
+import {
+    getAllTheDocuments, getTracksFromFirestore,
+    getTrackBySongName, getTrackByArtistName,
+    getTrackFromFirestore
+} from './firebaseModel.js'
+
 import { 
     loggedInNavUI, loggedOutNavUI, uploadUI, 
     loginUI, registerUI, trackUI, searchUI,
-    addCommentUI, commentsUI
+    addCommentUI, commentsUI, dashboardUI
 }from './innerHtml.js'
 
 import { initializeApp } from 'firebase/app'
@@ -52,6 +58,8 @@ let volumeSlider;
 let trackCurrentTime;
 let trackDuration;
 let songIsPlaying = false;
+
+let testDocButton;
 
 //////////////////////////////////////////////
 // AUTHENTICATION
@@ -230,10 +238,11 @@ const navUI = function(isloggedIn) {
     }
 }
 
-const sectionUI = function(sectionName, trackData = null, commentsData = null) {
+const sectionUI = async function(sectionName, trackData = null, commentsData = null) {
     sectionTag.innerHTML = '';
     if (sectionName === "main") {
-        getTracksFromFirestore();
+        let tracks = await getTracksFromFirestore();
+        renderMain(tracks);
     } else if(sectionName === "upload") {
         let html = uploadUI();
         sectionTag.insertAdjacentHTML('afterbegin', html);
@@ -255,7 +264,7 @@ const sectionUI = function(sectionName, trackData = null, commentsData = null) {
         const loginForm = document.querySelector('#login-form');
         const googleButton = document.querySelector('#google-sign-in');
         const faceBookButton = document.querySelector('#facebook-sign-in');
-        const anonymousButton = document.querySelector('#anonymous-sign-in')
+        const anonymousButton = document.querySelector('#anonymous-sign-in');
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = loginForm.email.value;
@@ -431,80 +440,17 @@ async function SaveAudioToFirestore(songUrl, songPath) {
 }
 
 ///////////////////////////////////////////
-// GET TRACKS FROM FIRESTORE
-
-const getTracksFromFirestore = function() {
-    const q = query(collection(db, "tracks"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        let tracks = [];
-        snapshot.forEach((doc) => {
-            tracks.push(doc.data());
-        });
-        renderMain(tracks);
-    });
-}
-
-const getTrackBySongName = function(songName) {
-    const q = query(collection(db, "tracks"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        let tracks = [];
-        snapshot.forEach((doc) => {
-            if(doc.data().SongName.toLowerCase().includes(songName)) {
-                tracks.push(doc.data());
-            }
-        });
-        if(tracks.length < 1) {
-            const errorMessage = '<p>No such Track Name found.</p>';
-            renderNullSearch(errorMessage);
-        } else {
-            renderMain(tracks)
-        }
-    })
-}
-
-const getTrackByArtistName = function(artistName) {
-    const q = query(collection(db, "tracks"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        let tracks = [];
-        snapshot.forEach((doc) => {
-            if(doc.data().ArtistName.toLowerCase().includes(artistName)) {
-                tracks.push(doc.data());
-            }
-        });
-        if(tracks.length < 1) {
-            const errorMessage = '<p>No such Artist Name found.</p>';
-            renderNullSearch(errorMessage);
-        } else {
-            renderMain(tracks)
-        }
-    })
-}
-
-async function getTrackFromFirestore(trackPath) {
-    const docRef = doc(db, "tracks", trackPath);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-        const trackData = docSnap.data();
-        getCommentsFromFirestore(trackData);
-        
-    } else {
-        console.log("No such document!");
-    }
-}
-
-///////////////////////////////////////////
 // GET AND ADD COMMENTS TO FIRESTORE
 const addCommentToFirestore = function(name, comment, songName) {
-        const songRef = collection(db, 'comments');
-        addDoc(songRef, {
-            Name: name,
-            Comment: comment,
-            SongName: songName,
-            createdAt: serverTimestamp()
-        }).then(() => {
-            console.log('comment added');
-        });
+    const songRef = collection(db, 'comments');
+    addDoc(songRef, {
+        Name: name,
+        Comment: comment,
+        SongName: songName,
+        createdAt: serverTimestamp()
+    }).then(() => {
+        console.log('comment added');
+    });
 }
 
 const getCommentsFromFirestore = function(trackData) {
@@ -523,29 +469,17 @@ const getCommentsFromFirestore = function(trackData) {
 }
 
 
-const renderMain = function(tracks) {
+const renderMain = async function(tracks) {
     sectionTag.innerHTML = '';
     tracks.forEach(function (track) {
-        let html = `
-        <div class="container-track track">
-            <div class="track-details">
-                <img class="track-image" id="track-image" src="${track.ImageUrl}" alt="">
-                <div class="track-description">
-                    <h2>${track.SongName}</h2>
-                    <p>${track.ArtistName}</p>
-                </div>
-                <div class="track-choice">
-                    <button class="btn-track-choice" id="btn-choice" value="${track.SongName}">Play</button>
-                </div>
-            </div>
-        </div>
-        `;
+        let html = dashboardUI(track);
         sectionTag.insertAdjacentHTML('afterbegin', html);
         const btnChoice = document.querySelector('#btn-choice');
         btnChoice.addEventListener('click', (e) => {
             const trackName = btnChoice.value;
             const trackPath = convertSongName(trackName);
-            getTrackFromFirestore(trackPath);
+            trackEvents(trackPath);
+            
         });
     });
 
@@ -563,12 +497,39 @@ const renderMain = function(tracks) {
         } else if(searchField.value.trim() === '') {
             renderIndex();
         } else if(searchChoices.value === 'artist') {
-            getTrackByArtistName(searchField.value.trim().toLowerCase());
+            searchEvents(searchField.value.trim().toLowerCase(), 'artist');
         } else if(searchChoices.value === 'track-name') {
-            getTrackBySongName(searchField.value.trim().toLowerCase());
+            searchEvents(searchField.value.trim().toLowerCase(), 'track-name');
         }
     });
     
+}
+
+const trackEvents = async function(trackPath) {
+    const trackData = await getTrackFromFirestore(trackPath);
+    getCommentsFromFirestore(trackData)
+}
+
+const searchEvents = async function(inputData, searchChoice) {
+    if(searchChoice === 'track-name') {
+        let tracks = await getTrackBySongName(inputData);
+        if(tracks.length < 1) {
+            const errorMessage = '<p>No such Track Name found.</p>';
+            renderNullSearch(errorMessage);
+        } 
+        else {
+            renderMain(tracks)
+        }
+    } else if(searchChoice === 'artist') {
+        let tracks = await getTrackByArtistName(inputData);
+        if(tracks.length < 1) {
+            const errorMessage = '<p>No such Artist Name found.</p>';
+            renderNullSearch(errorMessage);
+        } 
+        else {
+            renderMain(tracks)
+        }
+    }
 }
 
 const renderNullSearch = function(errorMessage) {
@@ -742,6 +703,22 @@ async function getaDoc() {
     }
 }
 // getaDoc();
+
+
+
+
+
+
+testDocButton = document.querySelector('#test-doc');
+testDocButton.addEventListener('click', () => {
+    // getDocs();
+    hellos();
+});
+
+function hellos() {
+    let h = getAllTheDocuments();
+    console.log(h)
+}
 
 
 
