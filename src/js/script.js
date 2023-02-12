@@ -3,11 +3,12 @@ import {
 } from './upload.js'
 
 import {
-    getAllTheDocuments, getTracksFromFirestore,
-    getTrackBySongName, getTrackByArtistName,
-    getTrackFromFirestore, addCommentToFirestore,
-    getCommentsFromFirestore2, SaveToFirestore,
-    SaveAudioToFirestore
+    getTracksFromFirestore,getTrackBySongName, 
+    getTrackByArtistName, getTrackFromFirestore, 
+    addCommentToFirestore, SaveToFirestore, 
+    SaveAudioToFirestore, googleSignIn, 
+    faceBookSignIn, anonymousSignIn,
+    emailSignIn, registerUser
 } from './firebaseModel.js'
 
 import { 
@@ -18,17 +19,12 @@ import {
 
 import { initializeApp } from 'firebase/app'
 import {
-    getFirestore, collection, 
-    getDocs, doc, setDoc, addDoc,
-    updateDoc, getDoc, query, onSnapshot, 
-    serverTimestamp, orderBy
+    getFirestore, collection,
+    query, onSnapshot, orderBy
 } from 'firebase/firestore'
 import firebaseConfig from './config.js'
 import {
-    getAuth, signInWithEmailAndPassword, 
-    onAuthStateChanged, signOut, getRedirectResult,
-    GoogleAuthProvider, signInWithRedirect, TwitterAuthProvider,
-    createUserWithEmailAndPassword, FacebookAuthProvider, signInAnonymously
+    getAuth, onAuthStateChanged, signOut, 
 } from 'firebase/auth'
 
 import {
@@ -39,9 +35,6 @@ import {
 initializeApp(firebaseConfig);
 
 const auth = getAuth();
-const fbProvider = new FacebookAuthProvider();
-const provider = new GoogleAuthProvider();
-const twProvider = new TwitterAuthProvider();
 
 const db = getFirestore();
 
@@ -55,129 +48,11 @@ let play;
 let timer;
 let slider;
 let VolIconDiv;
-let volumeIcon;
 let volumeSlider;
 let trackCurrentTime;
 let trackDuration;
 let songIsPlaying = false;
 
-let testDocButton;
-
-//////////////////////////////////////////////
-// AUTHENTICATION
-
-const emailSignIn = function(email, password) {
-    signInWithEmailAndPassword(auth, email, password)
-        .then((cred) => {
-            console.log("user logged in", cred.user);
-            loginForm.reset();
-            location.reload();
-        })
-        .catch((err) => {
-            console.log(err.message)
-        });
-}
-
-const googleSignIn = function() {
-    signInWithRedirect(auth, provider);
-
-    getRedirectResult(auth)
-  .then((result) => {
-    // This gives you a Google Access Token. You can use it to access Google APIs.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-
-    // The signed-in user info.
-    const user = result.user;
-    // location.reload();
-    console.log(user);
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.customData.email;
-    // The AuthCredential type that was used.
-    const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
-  });
-}
-
-async function faceBookSignIn() {
-    signInWithRedirect(auth, fbProvider);
-
-    getRedirectResult(auth)
-  .then((result) => {
-    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-    const credential = FacebookAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-
-    const user = result.user;
-    // IdP data available using getAdditionalUserInfo(result)
-    // ...
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.customData.email;
-    // AuthCredential type that was used.
-    const credential = FacebookAuthProvider.credentialFromError(error);
-    // ...
-  });
-}
-
-const anonymousSignIn = function() {
-    signInAnonymously(auth)
-  .then(() => {
-    // location.reload();
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // ...
-  });
-}
-
-const twitterSignIn = function() {
-    signInWithRedirect(auth, twProvider);
-
-    getRedirectResult(auth)
-  .then((result) => {
-    // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
-    // You can use these server side with your app's credentials to access the Twitter API.
-    const credential = TwitterAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-    const secret = credential.secret;
-    // ...
-
-    // The signed-in user info.
-    const user = result.user;
-    // IdP data available using getAdditionalUserInfo(result)
-    // ...
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.customData.email;
-    // The AuthCredential type that was used.
-    const credential = TwitterAuthProvider.credentialFromError(error);
-    // ...
-  });
-}
-
-const registerUser = function(email, password) {
-    createUserWithEmailAndPassword(auth, email, password)
-        .then((cred) => {
-            console.log('user created: ', cred.user);
-            registerForm.reset();
-            location.reload();
-        })
-        .catch((err) => {
-            console.log(err.message);
-    });
-}
 
 ///////////////////////////////////////
 // UI
@@ -426,7 +301,7 @@ async function UploadToStorage(songName, artistName, songImage, songAudio) {
 }   
 
 ///////////////////////////////////////////
-// GET AND ADD COMMENTS TO FIRESTORE
+// GET COMMENTS FROM FIRESTORE
 const getCommentsFromFirestore = function(trackData) {
     const colRef = collection(db, 'comments');
     const q = query(colRef, orderBy('createdAt'));
@@ -661,44 +536,6 @@ const renderIndex = function() {
 }
 
 renderIndex();
-
-
-
-async function getaDoc() {
-    const docRef = doc(db, "tracks", "hello-world");
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
-        console.log(docSnap.data().SongName);
-        console.log(docSnap.data().ArtistName);
-        console.log(docSnap.data().SongUrl);
-        console.log(docSnap.data().ImageUrl);
-    } else {
-        console.log("No such document!");
-    }
-}
-// getaDoc();
-
-
-
-
-
-const getAllTheDocs = function() {
-    const q = query(collection(db, "tracks"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        let tracks = [];
-        snapshot.forEach((doc) => {
-            tracks.push(doc);
-        })
-        tracks.forEach(track => {
-            console.log(track);
-        })
-    });
-}
-
-// getAllTheDocs();
-
 
 
 
