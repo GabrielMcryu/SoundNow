@@ -170,22 +170,22 @@ export const addCommentToFirestore = async function(name, comment, songName) {
 }
 
 // to be updated
-// export const getCommentsFromFirestore2 = async function(trackData) {
-//     let comments = [];
-//     const colRef = collection(db, 'comments');
-//     const q = query(colRef, orderBy('createdAt'));
-//     const songName = trackData.SongName;
-//     const unsubscribe = onSnapshot(q,async (snapshot) => {
-//         snapshot.forEach(async (doc) => {
-//             if(doc.data().SongName === songName) {
-//                 comments.push(doc.data());
-//             }
-//         });
-//         // renderTrack(trackData, comments);
-//     });
-//     console.log(comments.length);
-//     return comments;
-// }
+export const getCommentsFromFirestore2 = async function(trackData) {
+    let comments = [];
+    const colRef = collection(db, 'comments');
+    const q = query(colRef, orderBy('createdAt'));
+    const songName = trackData.SongName;
+    const unsubscribe = onSnapshot(q,async (snapshot) => {
+        snapshot.forEach(async (doc) => {
+            if(doc.data().SongName === songName) {
+                comments.push(doc.data());
+            }
+        });
+        // renderTrack(trackData, comments);
+    });
+    console.log(comments.length);
+    return comments;
+}
 
 
 ////////////////////////////////////////////

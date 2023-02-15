@@ -119,6 +119,7 @@ export const loginUI = () => {
 
                 <input class="submit-btn" type="submit" value="Login">
             </form>
+
             <div class="form-text">
                 <p>OR SIGN IN WITH</p>
             </div>
@@ -148,6 +149,16 @@ export const registerUI = () => {
 
                 <input class="submit-btn" type="submit" value="Register">
             </form>
+
+            <div class="form-text">
+                <p>OR SIGN IN WITH</p>
+            </div>
+            
+            <div class="form-buttons">
+                <button class="button-social button-google" id="google-sign-in">Google</button>
+                <button class="button-social button-facebook" id="facebook-sign-in">Facebook</button>
+                <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button>
+            </div>
         </div>
     </div>
     `;

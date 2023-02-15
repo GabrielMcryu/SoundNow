@@ -362,3 +362,24 @@ input[type="range"] {
 .c-date {
     color: #adb5bd;
 }
+
+/* ********************************************* */
+/* UPLOAD VIEW SECTION */
+/* ********************************************* */
+.upload-view {
+    margin-top: 3.2rem;
+    margin-bottom: 3.2rem;
+}
+
+.upload-view h2 {
+    margin-bottom: 3.2rem;
+    text-align: center;
+    font-size: 3.2rem;
+    color: #f76707;
+}
+
+.upload-view p {
+    text-align: center;
+    font-size: 2.4rem;
+    padding: 2.4rem;
+}

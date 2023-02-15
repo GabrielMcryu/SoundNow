@@ -8,7 +8,7 @@ import {
     addCommentToFirestore, SaveToFirestore, 
     SaveAudioToFirestore, googleSignIn, 
     faceBookSignIn, anonymousSignIn,
-    emailSignIn, registerUser
+    emailSignIn, registerUser, getCommentsFromFirestore2
 } from './firebaseModel.js'
 
 import { 
@@ -156,17 +156,29 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         });
         anonymousButton.addEventListener('click', (e) => {
             anonymousSignIn();
-        })
+        });
     } else if(sectionName === "register") {
         let html = registerUI()
         sectionTag.insertAdjacentHTML('afterbegin', html);
 
         const registerForm = document.querySelector('#register-form');
+        const googleButton = document.querySelector('#google-sign-in');
+        const faceBookButton = document.querySelector('#facebook-sign-in');
+        const anonymousButton = document.querySelector('#anonymous-sign-in');
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = registerForm.email.value;
             const password = registerForm.password.value;
             registerUser(email, password);
+        });
+        googleButton.addEventListener('click', (e) => {
+            googleSignIn();
+        });
+        faceBookButton.addEventListener('click', (e) => {
+            faceBookSignIn();
+        });
+        anonymousButton.addEventListener('click', (e) => {
+            anonymousSignIn();
         });
     } else if(sectionName === "track") {
         // Comments UI
@@ -252,6 +264,8 @@ const renderTrack = function(trackData, comments) {
 // UPLOAD TRACK TO FIREBASE
 
 async function UploadToStorage(songName, artistName, songImage, songAudio) {
+    sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
+    let uploadViewTag = document.querySelector('#upload-view-tag');
     const songPath = convertSongName(songName);
     const imgName = songImage.name;
     const audioName = songAudio.name;
@@ -271,8 +285,12 @@ async function UploadToStorage(songName, artistName, songImage, songAudio) {
     const audioUploadTask = uploadBytesResumable(audioStorageRef, songAudio, audioMetaData);
 
     imageUploadTask.on('state-changed', (snapshot) => {
-        const progress = (snapshot.bytesTransferred /snapshot.totalBytes) * 100;
+        const progress = Math.trunc((snapshot.bytesTransferred /snapshot.totalBytes) * 100);
         console.log('Upload is ' + progress + '% done');
+        uploadViewTag.innerHTML = `
+            <h2>Please wait as we upload your track</h2>
+            <p>Image upload is ${progress}% done...</p>
+        `;
     },
     (error) => {
         alert("error: image not uploaded");
@@ -285,18 +303,31 @@ async function UploadToStorage(songName, artistName, songImage, songAudio) {
     );
 
     audioUploadTask.on('state-changed', (snapshot) => {
-        const progress = (snapshot.bytesTransferred /snapshot.totalBytes) * 100;
+        const progress = Math.trunc((snapshot.bytesTransferred /snapshot.totalBytes) * 100);
         console.log('Upload is ' + progress + '% done');
+        uploadViewTag.innerHTML = `
+            <h2>Please wait as we upload your track</h2>
+            <p>Image upload is 100% done...</p>
+            <p>Audio upload is ${progress}% done...</p>
+        `;
     },
     (error) => {
         alert("error: audio not uploaded");
     },
-    () => {
-        getDownloadURL(audioUploadTask.snapshot.ref).then((downloadURL) => {
+    (async () => {
+        await getDownloadURL(audioUploadTask.snapshot.ref).then((downloadURL) => {
+            uploadViewTag.innerHTML = `
+                <p>Upload Complete! you'll be redirected in a few seconds</p>
+            `;
             SaveAudioToFirestore(downloadURL, songPath);
+            
         })
-    }
+        setTimeout(function () {
+            renderIndex();
+        }, 3000);
+    }),
     );
+
     
 }   
 
