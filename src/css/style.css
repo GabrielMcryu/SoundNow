@@ -212,6 +212,7 @@ input[type="range"] {
     margin: 0 auto;
     max-width: 100rem;
     /* margin-bottom: 2.4rem; */
+    height: 30rem;
 }
 
 .track-shadow {
@@ -237,7 +238,7 @@ input[type="range"] {
 .form-buttons {
     margin-top: 0.8rem;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     column-gap: 0.8rem;
 }
 
@@ -312,6 +313,11 @@ input[type="range"] {
 .btn-search:hover {
     background-color: #d9480f;
     transition: all 0.3s;
+}
+
+.error-text {
+    font-size: 1.8rem;
+    text-align: center;
 }
 
 /* ********************************************* */

@@ -3,6 +3,7 @@ import trackImage from '../img/img1.jpg';
 export const loggedInNavUI = () => {
     let html = `
         <ul class="main-nav-list">
+            <li><a class="main-nav-link" href="javascript:" id="user-uploads">My Uploads</a></li>
             <li><a class="main-nav-link" href="javascript:" id="upload">Upload Song</a></li>
             <li><a class="main-nav-link" href="javascript:" id="dashboard">Dashboard</a></li>
             <li><a class="main-nav-link logout" href="javascript:">Logout</a></li>
@@ -127,7 +128,7 @@ export const loginUI = () => {
             <div class="form-buttons">
                 <button class="button-social button-google" id="google-sign-in">Google</button>
                 <button class="button-social button-facebook" id="facebook-sign-in">Facebook</button>
-                <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button>
+                <!-- <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button> -->
             </div>
         </div>
     </div>
@@ -157,7 +158,7 @@ export const registerUI = () => {
             <div class="form-buttons">
                 <button class="button-social button-google" id="google-sign-in">Google</button>
                 <button class="button-social button-facebook" id="facebook-sign-in">Facebook</button>
-                <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button>
+                <!-- <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button> -->
             </div>
         </div>
     </div>

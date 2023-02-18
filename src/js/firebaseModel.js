@@ -28,7 +28,6 @@ export const emailSignIn = async function(email, password) {
     signInWithEmailAndPassword(auth, email, password)
         .then((cred) => {
             console.log("user logged in", cred.user);
-            loginForm.reset();
         })
         .catch((err) => {
             console.log(err.message)
@@ -99,7 +98,6 @@ export const registerUser = async function(email, password) {
     createUserWithEmailAndPassword(auth, email, password)
         .then((cred) => {
             console.log('user created: ', cred.user);
-            registerForm.reset();
         })
         .catch((err) => {
             console.log(err.message);
@@ -191,12 +189,15 @@ export const getCommentsFromFirestore2 = async function(trackData) {
 ////////////////////////////////////////////
 // UPLOAD TRACK TO FIREBASE
 
-export async function SaveToFirestore(imgUrl, songName, artistName, songPath) {
+export async function SaveToFirestore(imgUrl, songName, artistName, songPath, userId, imagePath, audioPath) {
     const songRef = doc(db, 'tracks', songPath);
     await setDoc(songRef, {
         SongName: songName,
         ArtistName: artistName,
-        ImageUrl: imgUrl
+        ImageUrl: imgUrl,
+        UploderId: userId,
+        ImagePath: imagePath,
+        AudioPath: audioPath,
     }, { merge: true });
 
     console.log('image upload finished');

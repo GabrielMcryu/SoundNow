@@ -56,13 +56,14 @@ let songIsPlaying = false;
 
 ///////////////////////////////////////
 // UI
-const navUI = function(isloggedIn) {
+const navUI = function(isloggedIn, userId = null) {
     navigation.innerHTML = '';
     let html;
     let logout;
     let upload;
     let loginLink;
     let registerLink;
+    let userUploadLink;
     let dashboard;
     if(isloggedIn) {
         html = loggedInNavUI();
@@ -73,7 +74,6 @@ const navUI = function(isloggedIn) {
             signOut(auth)
                 .then(() => {
                     console.log('the user has signed out');
-                    renderIndex();
                 })
                 .catch((err) => {
                     console.log(err.message);
@@ -82,12 +82,17 @@ const navUI = function(isloggedIn) {
 
         upload = document.querySelector('#upload');
         upload.addEventListener('click', () => {
-            renderUpload(isloggedIn);
+            renderUpload(isloggedIn, userId);
         });
 
         dashboard = document.querySelector('#dashboard');
         dashboard.addEventListener('click', () => {
             renderIndex();
+        });
+
+        userUploadLink = document.querySelector('#user-uploads');
+        userUploadLink.addEventListener('click', () => {
+            renderUserUploads(userId);
         });
     } else {
         html = loggedOutNavUI();
@@ -115,7 +120,7 @@ const navUI = function(isloggedIn) {
     }
 }
 
-const sectionUI = async function(sectionName, trackData = null, commentsData = null) {
+const sectionUI = async function(sectionName, trackData = null, commentsData = null, userId = null) {
     sectionTag.innerHTML = '';
     if (sectionName === "main") {
         let tracks = await getTracksFromFirestore();
@@ -131,7 +136,9 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
             const artistName = uploadForm.artistName.value;
             const songImage = uploadForm.songImage.files[0];
             const songAudio = uploadForm.songAudio.files[0];
-            UploadToStorage(songName, artistName, songImage, songAudio);
+            console.log(songImage.name);
+            console.log(songAudio.name);
+            UploadToStorage(songName, artistName, songImage, songAudio, userId);
         });
 
     } else if(sectionName === "login") {
@@ -141,7 +148,7 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         const loginForm = document.querySelector('#login-form');
         const googleButton = document.querySelector('#google-sign-in');
         const faceBookButton = document.querySelector('#facebook-sign-in');
-        const anonymousButton = document.querySelector('#anonymous-sign-in');
+        // const anonymousButton = document.querySelector('#anonymous-sign-in');
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = loginForm.email.value;
@@ -154,9 +161,9 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         faceBookButton.addEventListener('click', (e) => {
             faceBookSignIn();
         });
-        anonymousButton.addEventListener('click', (e) => {
-            anonymousSignIn();
-        });
+        // anonymousButton.addEventListener('click', (e) => {
+        //     anonymousSignIn();
+        // });
     } else if(sectionName === "register") {
         let html = registerUI()
         sectionTag.insertAdjacentHTML('afterbegin', html);
@@ -218,6 +225,9 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         VolIconDiv = document.querySelector('#track-vol-div');
         volumeSlider = document.querySelector('#track-volume-slider');
         volumeIcon = document.querySelector('#volume-icon');
+        const focusTrackSection = document.querySelector('.image-view');
+        
+        focusTrackSection.scrollIntoView();
 
         // all track event listeners
         play.addEventListener("click", justPlay);
@@ -236,10 +246,10 @@ const addCommentEvent = async function(name, comment, songName) {
     await addCommentToFirestore(name, comment, songName);
 }
 
-const renderUpload = function(isLoggedIn) {
+const renderUpload = function(isLoggedIn, userId = null) {
     if(isLoggedIn) {
         const sectionName = "upload";
-        sectionUI(sectionName);
+        sectionUI(sectionName, null, null, userId);
     } else {
         renderLogin();
     }
@@ -257,13 +267,17 @@ const renderRegister = function() {
 
 const renderTrack = function(trackData, comments) {
     const sectionName = "track";
-    sectionUI(sectionName, trackData, comments);
+    sectionUI(sectionName, trackData, comments, null);
+}
+
+const renderUserUploads = function(userId) {
+    console.log(userId);
 }
 
 ////////////////////////////////////////////
 // UPLOAD TRACK TO FIREBASE
 
-async function UploadToStorage(songName, artistName, songImage, songAudio) {
+async function UploadToStorage(songName, artistName, songImage, songAudio, userId) {
     sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
     let uploadViewTag = document.querySelector('#upload-view-tag');
     const songPath = convertSongName(songName);
@@ -297,7 +311,7 @@ async function UploadToStorage(songName, artistName, songImage, songAudio) {
     },
     () => {
         getDownloadURL(imageUploadTask.snapshot.ref).then((downloadURL) => {
-            SaveToFirestore(downloadURL, songName, artistName, songPath)
+            SaveToFirestore(downloadURL, songName, artistName, songPath, userId, songImage.name, songAudio.name)
         })
     }
     );
@@ -351,17 +365,23 @@ const getCommentsFromFirestore = function(trackData) {
 
 const renderMain = async function(tracks) {
     sectionTag.innerHTML = '';
-    tracks.forEach(function (track) {
-        let html = dashboardUI(track);
-        sectionTag.insertAdjacentHTML('afterbegin', html);
-        const btnChoice = document.querySelector('#btn-choice');
-        btnChoice.addEventListener('click', (e) => {
-            const trackName = btnChoice.value;
-            const trackPath = convertSongName(trackName);
-            trackEvents(trackPath);
-            
+    
+    if(tracks.length == 0) {
+        const noTracksText = `<p class="error-text">No Tracks Uploaded Yet...</p>`;
+        sectionTag.insertAdjacentHTML('afterbegin', noTracksText);
+
+    } else {
+        tracks.forEach(function (track) {
+            let html = dashboardUI(track);
+            sectionTag.insertAdjacentHTML('afterbegin', html);
+            const btnChoice = document.querySelector('#btn-choice');
+            btnChoice.addEventListener('click', (e) => {
+                const trackName = btnChoice.value;
+                const trackPath = convertSongName(trackName);
+                trackEvents(trackPath);
+            });
         });
-    });
+    }
 
     let html = searchUI();
     sectionTag.insertAdjacentHTML('afterbegin', html);
@@ -396,7 +416,7 @@ const searchEvents = async function(inputData, searchChoice) {
     if(searchChoice === 'track-name') {
         let tracks = await getTrackBySongName(inputData);
         if(tracks.length < 1) {
-            const errorMessage = '<p>No such Track Name found.</p>';
+            const errorMessage = '<p class="error-text">No such Track Name found.</p>';
             renderNullSearch(errorMessage);
         } 
         else {
@@ -405,7 +425,7 @@ const searchEvents = async function(inputData, searchChoice) {
     } else if(searchChoice === 'artist') {
         let tracks = await getTrackByArtistName(inputData);
         if(tracks.length < 1) {
-            const errorMessage = '<p>No such Artist Name found.</p>';
+            const errorMessage = '<p class="error-text">No such Artist Name found.</p>';
             renderNullSearch(errorMessage);
         } 
         else {
@@ -554,13 +574,24 @@ const renderIndex = function() {
         let isLoggedIn
         const sectionName = "main";
         if(user) {
-            isLoggedIn = true;
-            navUI(isLoggedIn);
-            sectionUI(sectionName);
+            if(user.isAnonymous) {
+                console.log('anonymous');
+                isLoggedIn = false;
+                navUI(isLoggedIn);
+                sectionUI(sectionName);
+            } else {
+                console.log('not anonymous');
+                console.log(user.uid);
+                const userId = user.uid;
+                isLoggedIn = true;
+                navUI(isLoggedIn, userId);
+                sectionUI(sectionName);
+            }
         } else {
             isLoggedIn = false;
-            navUI(isLoggedIn);
-            sectionUI(sectionName);
+            anonymousSignIn();
+            // navUI(isLoggedIn);
+            // sectionUI(sectionName);
         }
 
     });
