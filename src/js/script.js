@@ -7,14 +7,17 @@ import {
     getTrackByArtistName, getTrackFromFirestore, 
     addCommentToFirestore, SaveToFirestore, 
     SaveAudioToFirestore, googleSignIn, 
-    faceBookSignIn, anonymousSignIn,
-    emailSignIn, registerUser, getCommentsFromFirestore2
+    faceBookSignIn, anonymousSignIn, getTracksByUploaderId,
+    emailSignIn, registerUser, getCommentsFromFirestore2,
+    deleteTrackFromFirestore, deleteImageFromStorage, deleteAudioFromStorage,
+    deleteCommentsByTrackId
 } from './firebaseModel.js'
 
 import { 
     loggedInNavUI, loggedOutNavUI, uploadUI, 
     loginUI, registerUI, trackUI, searchUI,
-    addCommentUI, commentsUI, dashboardUI
+    addCommentUI, commentsUI, dashboardUI,
+    uploaderTracksUI
 }from './innerHtml.js'
 
 import { initializeApp } from 'firebase/app'
@@ -237,6 +240,33 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         track.addEventListener('timeupdate', songTimeUpdate);
         loadTrack(songUrl);
 
+    } else if(sectionName === "user-uploads") {
+        let tracks = await getTracksByUploaderId(userId);
+        
+        if(tracks.length == 0) {
+            const noTracksText = `<p class="error-text">No Tracks Uploaded Yet...</p>`;
+            sectionTag.insertAdjacentHTML('afterbegin', noTracksText);
+    
+        } else {
+            tracks.forEach(function (track) {
+                let html = uploaderTracksUI(track);
+                sectionTag.insertAdjacentHTML('afterbegin', html);
+                const btnChoice = document.querySelector('#btn-choice');
+                const btnUpdate = document.querySelector('#btn-update');
+                const btnDelete = document.querySelector('#btn-delete');
+                btnChoice.addEventListener('click', (e) => {
+                    const trackName = btnChoice.value;
+                    const trackPath = convertSongName(trackName);
+                    trackEvents(trackPath);
+                });
+                btnUpdate.addEventListener('click', (e) => {
+                    console.log('update');
+                });
+                btnDelete.addEventListener('click', (e) => {
+                    deleteTrackFromFirebase(track, userId);
+                });
+            });
+        }
     } else {
         console.log("hello world");
     }
@@ -271,7 +301,8 @@ const renderTrack = function(trackData, comments) {
 }
 
 const renderUserUploads = function(userId) {
-    console.log(userId);
+    const sectionName = "user-uploads";
+    sectionUI(sectionName, null, null, userId);
 }
 
 ////////////////////////////////////////////
@@ -457,6 +488,19 @@ const renderNullSearch = function(errorMessage) {
             searchEvents(searchField.value.trim().toLowerCase(), 'track-name');
         }
     });
+}
+
+const deleteTrackFromFirebase = async function(track, userId) {
+    const trackPath = convertSongName(track.SongName);
+    const trackImagePath = track.ImagePath;
+    const trackAudioPath = track.AudioPath;
+
+    await deleteCommentsByTrackId(track.SongName);
+    await deleteTrackFromFirestore(trackPath);
+    await deleteImageFromStorage(trackImagePath);
+    await deleteAudioFromStorage(trackAudioPath);
+
+    renderUserUploads(userId);
 }
 
 /////////////////////////////////////

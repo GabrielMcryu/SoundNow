@@ -152,6 +152,7 @@ input[type="range"] {
     display: flex;
     flex-grow: 1;
     justify-content: right;
+    column-gap: 2rem;
 }
 
 .btn-track-choice {
@@ -388,4 +389,40 @@ input[type="range"] {
     text-align: center;
     font-size: 2.4rem;
     padding: 2.4rem;
+}
+
+/* ********************************************* */
+/* TRACK VIEW SECTION */
+/* ********************************************* */
+
+.btn-track-delete {
+    font-size: 1.8rem;
+    color: #fff;
+    background-color: #f03e3e;
+    border-radius: 5px;
+    border: none;
+    padding: 1.8rem 3.2rem;
+    margin-bottom: 1.2rem;
+    cursor: pointer;
+}
+
+.btn-track-delete:hover {
+    background-color: #c92a2a;
+    transition: all 0.3s;
+}
+
+.btn-track-update {
+    font-size: 1.8rem;
+    color: #fff;
+    background-color: #495057;
+    border-radius: 5px;
+    border: none;
+    padding: 1.8rem 3.2rem;
+    margin-bottom: 1.2rem;
+    cursor: pointer;
+}
+
+.btn-track-update:hover {
+    background-color: #212529;
+    transition: all 0.3s;
 }

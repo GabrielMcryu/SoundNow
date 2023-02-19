@@ -210,3 +210,23 @@ export const commentsUI = (name, comment, commentDate) => {
     `;
     return html;
 }
+
+export const uploaderTracksUI = (track) => {
+    let html = `
+    <div class="container-track track">
+        <div class="track-details">
+            <img class="track-image" id="track-image" src="${track.ImageUrl}" alt="">
+            <div class="track-description">
+                <h2>${track.SongName}</h2>
+                <p>${track.ArtistName}</p>
+            </div>
+            <div class="track-choice">
+                <button class="btn-track-choice" id="btn-choice" value="${track.SongName}">Play</button>
+                <button class="btn-track-update" id="btn-update" value="${track.SongName}">Update</button>
+                <button class="btn-track-delete" id="btn-delete" value="${track.SongName}">Delete</button>
+            </div>
+        </div>
+    </div>
+    `;
+    return html;
+}

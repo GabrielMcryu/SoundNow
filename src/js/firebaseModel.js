@@ -4,7 +4,7 @@ import {
     getFirestore, collection, 
     getDocs, doc, setDoc, addDoc,
     updateDoc, getDoc, query, onSnapshot, 
-    serverTimestamp, orderBy
+    serverTimestamp, orderBy, deleteDoc
 } from 'firebase/firestore'
 
 import {
@@ -14,12 +14,18 @@ import {
     createUserWithEmailAndPassword, FacebookAuthProvider, signInAnonymously
 } from 'firebase/auth'
 
+import { 
+    getStorage, ref, deleteObject 
+} from "firebase/storage";
+
+
 initializeApp(firebaseConfig);
 
 const auth = getAuth();
 const fbProvider = new FacebookAuthProvider();
 const provider = new GoogleAuthProvider();
 
+const storage = getStorage();
 const db = getFirestore();
 
 //////////////////////////////////////////////
@@ -111,6 +117,7 @@ export const getTracksFromFirestore = async function() {
     const q = query(collection(db, "tracks"));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
+        console.log(doc.id)
         tracks.push(doc.data());
     });
     return tracks;
@@ -140,6 +147,18 @@ export const getTrackByArtistName = async function(artistName) {
     return tracks;
 }
 
+export const getTracksByUploaderId = async function(userId) {
+    let tracks = [];
+    const q = query(collection(db, "tracks"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        if(doc.data().UploaderId.includes(userId)) {
+            tracks.push(doc.data());
+        }
+    });
+    return tracks;
+}
+
 export const getTrackFromFirestore = async function(trackPath) {
     let trackData = {};
     const docRef = doc(db, "tracks", trackPath);
@@ -151,6 +170,42 @@ export const getTrackFromFirestore = async function(trackPath) {
         console.log("No such document!");
     }
     return trackData;
+}
+
+////////////////////////////////////////////
+// DELETE TRACK FROM FIRESTORE AND STORAGE
+export const deleteTrackFromFirestore = async function(trackPath) {
+    await deleteDoc(doc(db, "tracks", trackPath));
+}
+
+export const deleteImageFromStorage = async function(imagePath) {
+    const imageRef = ref(storage, `Images/${imagePath}`);
+    // Delete the Image
+    await deleteObject(imageRef).then(() => {
+        console.log('Image deleted');
+    }).catch((error) => {
+        console.log('error occured while deleting image');
+    });
+}
+
+export const deleteAudioFromStorage = async function(audioPath) {
+    const audioRef = ref(storage, `Tracks/${audioPath}`);
+    // Delete the Audio
+    await deleteObject(audioRef).then(() => {
+        console.log('Audio deleted');
+    }).catch((error) => {
+        console.log('error occured while deleting audio');
+    });
+}
+
+export const deleteCommentsByTrackId = async function(songName) {
+    const q = query(collection(db, "comments"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (document) => {
+        if(document.data().SongName.includes(songName)) {
+            await deleteDoc(doc(db, "comments", document.id));
+        }
+    });
 }
 
 ///////////////////////////////////////////
@@ -195,7 +250,7 @@ export async function SaveToFirestore(imgUrl, songName, artistName, songPath, us
         SongName: songName,
         ArtistName: artistName,
         ImageUrl: imgUrl,
-        UploderId: userId,
+        UploaderId: userId,
         ImagePath: imagePath,
         AudioPath: audioPath,
     }, { merge: true });
