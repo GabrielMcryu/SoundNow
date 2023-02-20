@@ -426,3 +426,37 @@ input[type="range"] {
     background-color: #212529;
     transition: all 0.3s;
 }
+
+/* ********************************************* */
+/* UDPDATE TRACK SECTION */
+/* ********************************************* */
+.update-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 2rem;
+}
+
+.update-input-field {
+    margin-top: 1.8rem;
+    margin-bottom: 1.8rem;
+    padding: 1.2rem;
+    border-radius: 5px;
+    font-size: 1.8rem;
+    flex-grow: 1;
+}
+
+.update-input-button {
+    font-size: 1.8rem;
+    color: #fff;
+    background-color: #f76707;
+    border-radius: 5px;
+    border: none;
+    padding: 1.4rem 3.2rem;
+    cursor: pointer;
+}
+
+.update-input-button:hover {
+    background-color: #d9480f;
+    transition: all 0.3s;
+}

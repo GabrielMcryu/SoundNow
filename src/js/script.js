@@ -1,8 +1,4 @@
 import {
-    convertSongName
-} from './upload.js'
-
-import {
     getTracksFromFirestore,getTrackBySongName, 
     getTrackByArtistName, getTrackFromFirestore, 
     addCommentToFirestore, SaveToFirestore, 
@@ -10,14 +6,15 @@ import {
     faceBookSignIn, anonymousSignIn, getTracksByUploaderId,
     emailSignIn, registerUser, getCommentsFromFirestore2,
     deleteTrackFromFirestore, deleteImageFromStorage, deleteAudioFromStorage,
-    deleteCommentsByTrackId
+    deleteCommentsByTrackId, updateSongNameToFirestore, updateArtistNameToFirestore,
+    SaveTrackToFirestore, updateImageToFirestore, updateAudioToFirestore
 } from './firebaseModel.js'
 
 import { 
     loggedInNavUI, loggedOutNavUI, uploadUI, 
     loginUI, registerUI, trackUI, searchUI,
     addCommentUI, commentsUI, dashboardUI,
-    uploaderTracksUI
+    uploaderTracksUI, updateTrackUI
 }from './innerHtml.js'
 
 import { initializeApp } from 'firebase/app'
@@ -123,7 +120,7 @@ const navUI = function(isloggedIn, userId = null) {
     }
 }
 
-const sectionUI = async function(sectionName, trackData = null, commentsData = null, userId = null) {
+const sectionUI = async function(sectionName, trackData = null, commentsData = null, userId = null, trackId = null) {
     sectionTag.innerHTML = '';
     if (sectionName === "main") {
         let tracks = await getTracksFromFirestore();
@@ -141,7 +138,7 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
             const songAudio = uploadForm.songAudio.files[0];
             console.log(songImage.name);
             console.log(songAudio.name);
-            UploadToStorage(songName, artistName, songImage, songAudio, userId);
+            UploadImageToStorage(songName, artistName, songImage, songAudio, userId);
         });
 
     } else if(sectionName === "login") {
@@ -204,13 +201,12 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         sectionTag.insertAdjacentHTML('afterbegin', html);
 
         // Comments Form UI
-        let songName = trackData.SongName;
         addCommentForm = document.querySelector('#upload-comment');
         addCommentForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = addCommentForm.name.value;
             const comment = addCommentForm.comment.value;
-            addCommentEvent(name, comment, songName);
+            addCommentEvent(name, comment, trackId);
             addCommentForm.reset();
         });
 
@@ -255,12 +251,11 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
                 const btnUpdate = document.querySelector('#btn-update');
                 const btnDelete = document.querySelector('#btn-delete');
                 btnChoice.addEventListener('click', (e) => {
-                    const trackName = btnChoice.value;
-                    const trackPath = convertSongName(trackName);
-                    trackEvents(trackPath);
+                    const trackId = btnChoice.value;
+                    trackEvents(trackId);
                 });
                 btnUpdate.addEventListener('click', (e) => {
-                    console.log('update');
+                    renderUpdateTrack(track, userId);
                 });
                 btnDelete.addEventListener('click', (e) => {
                     deleteTrackFromFirebase(track, userId);
@@ -272,14 +267,14 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
     }
 }
 
-const addCommentEvent = async function(name, comment, songName) {
-    await addCommentToFirestore(name, comment, songName);
+const addCommentEvent = async function(name, comment, trackId) {
+    await addCommentToFirestore(name, comment, trackId);
 }
 
 const renderUpload = function(isLoggedIn, userId = null) {
     if(isLoggedIn) {
         const sectionName = "upload";
-        sectionUI(sectionName, null, null, userId);
+        sectionUI(sectionName, null, null, userId, null);
     } else {
         renderLogin();
     }
@@ -295,39 +290,31 @@ const renderRegister = function() {
     sectionUI(sectionName);
 }
 
-const renderTrack = function(trackData, comments) {
+const renderTrack = function(trackId, trackData, comments) {
     const sectionName = "track";
-    sectionUI(sectionName, trackData, comments, null);
+    sectionUI(sectionName, trackData, comments, null, trackId);
 }
 
 const renderUserUploads = function(userId) {
     const sectionName = "user-uploads";
-    sectionUI(sectionName, null, null, userId);
+    sectionUI(sectionName, null, null, userId, null);
 }
 
 ////////////////////////////////////////////
 // UPLOAD TRACK TO FIREBASE
 
-async function UploadToStorage(songName, artistName, songImage, songAudio, userId) {
+async function UploadImageToStorage(songName, artistName, songImage, songAudio, userId) {
     sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
     let uploadViewTag = document.querySelector('#upload-view-tag');
-    const songPath = convertSongName(songName);
     const imgName = songImage.name;
-    const audioName = songAudio.name;
-
-    const audioMetaData = {
-        contentType: songAudio.type
-    }
 
     const imageMetaData = {
         contentType: songImage.type
     }
 
     const imageStorageRef = sRef(storage, 'Images/' + imgName);
-    const audioStorageRef = sRef(storage, 'Tracks/' + audioName);
 
     const imageUploadTask = uploadBytesResumable(imageStorageRef, songImage, imageMetaData);
-    const audioUploadTask = uploadBytesResumable(audioStorageRef, songAudio, audioMetaData);
 
     imageUploadTask.on('state-changed', (snapshot) => {
         const progress = Math.trunc((snapshot.bytesTransferred /snapshot.totalBytes) * 100);
@@ -341,11 +328,26 @@ async function UploadToStorage(songName, artistName, songImage, songAudio, userI
         alert("error: image not uploaded");
     },
     () => {
-        getDownloadURL(imageUploadTask.snapshot.ref).then((downloadURL) => {
-            SaveToFirestore(downloadURL, songName, artistName, songPath, userId, songImage.name, songAudio.name)
+        getDownloadURL(imageUploadTask.snapshot.ref).then(async (downloadURL) => {
+            await UploadToStorage(downloadURL, songName, artistName, userId, imgName, songAudio);
         })
     }
     );
+
+}   
+
+async function UploadToStorage(imgUrl, songName, artistName, userId, imgName, songAudio) {
+    sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
+    let uploadViewTag = document.querySelector('#upload-view-tag');
+    const audioName = songAudio.name;
+
+    const audioMetaData = {
+        contentType: songAudio.type
+    }
+
+    const audioStorageRef = sRef(storage, 'Tracks/' + audioName);
+
+    const audioUploadTask = uploadBytesResumable(audioStorageRef, songAudio, audioMetaData);
 
     audioUploadTask.on('state-changed', (snapshot) => {
         const progress = Math.trunc((snapshot.bytesTransferred /snapshot.totalBytes) * 100);
@@ -360,36 +362,35 @@ async function UploadToStorage(songName, artistName, songImage, songAudio, userI
         alert("error: audio not uploaded");
     },
     (async () => {
-        await getDownloadURL(audioUploadTask.snapshot.ref).then((downloadURL) => {
+        await getDownloadURL(audioUploadTask.snapshot.ref).then(async (downloadURL) => {
             uploadViewTag.innerHTML = `
                 <p>Upload Complete! you'll be redirected in a few seconds</p>
             `;
-            SaveAudioToFirestore(downloadURL, songPath);
-            
+            await SaveTrackToFirestore(imgUrl, downloadURL, songName, artistName, userId, imgName, audioName);
         })
         setTimeout(function () {
             renderIndex();
         }, 3000);
     }),
     );
-
     
 }   
 
+
 ///////////////////////////////////////////
 // GET COMMENTS FROM FIRESTORE
-const getCommentsFromFirestore = function(trackData) {
+const getCommentsFromFirestore = function(trackData, trackId) {
     const colRef = collection(db, 'comments');
     const q = query(colRef, orderBy('createdAt'));
     const songName = trackData.SongName;
     const unsubscribe = onSnapshot(q,async (snapshot) => {
         let comments = [];
         snapshot.forEach((doc) => {
-            if(doc.data().SongName === songName) {
+            if(doc.data().TrackId === trackId) {
                 comments.push(doc.data());
             }
         });
-        renderTrack(trackData, comments);
+        renderTrack(trackId, trackData, comments);
     });
 }
 
@@ -407,9 +408,8 @@ const renderMain = async function(tracks) {
             sectionTag.insertAdjacentHTML('afterbegin', html);
             const btnChoice = document.querySelector('#btn-choice');
             btnChoice.addEventListener('click', (e) => {
-                const trackName = btnChoice.value;
-                const trackPath = convertSongName(trackName);
-                trackEvents(trackPath);
+                const trackId = btnChoice.value;
+                trackEvents(trackId);
             });
         });
     }
@@ -436,10 +436,10 @@ const renderMain = async function(tracks) {
     
 }
 
-const trackEvents = async function(trackPath) {
-    const trackData = await getTrackFromFirestore(trackPath);
+const trackEvents = async function(trackId) {
+    const trackData = await getTrackFromFirestore(trackId);
     // const comments = await getCommentsFromFirestore2(trackData);
-    getCommentsFromFirestore(trackData);
+    getCommentsFromFirestore(trackData, trackId);
     // renderTrack(trackData, comments);
 }
 
@@ -490,13 +490,135 @@ const renderNullSearch = function(errorMessage) {
     });
 }
 
-const deleteTrackFromFirebase = async function(track, userId) {
-    const trackPath = convertSongName(track.SongName);
-    const trackImagePath = track.ImagePath;
-    const trackAudioPath = track.AudioPath;
+// Update UI
+const renderUpdateTrack = function(trackData, userId) {
+    const trackId = trackData[0];
+    sectionTag.innerHTML = '';
+    let html = updateTrackUI(trackData);
+    sectionTag.insertAdjacentHTML('afterbegin', html);
 
-    await deleteCommentsByTrackId(track.SongName);
-    await deleteTrackFromFirestore(trackPath);
+    const songNameField = document.querySelector('#song-name-input');
+    const artistNameField = document.querySelector('#artist-name-input');
+    const trackImageField = document.querySelector('#track-image-input');
+    const audioImageField = document.querySelector('#track-audio-input');
+
+    const btnUpdateSongName = document.querySelector('#btn-update-song-name');
+    const btnUpdateArtistName = document.querySelector('#btn-update-artist-name');
+    const btnUpdateTrackImage = document.querySelector('#btn-update-track-image');
+    const btnUpdateTrackAudio = document.querySelector('#btn-update-track-audio');
+
+    btnUpdateSongName.addEventListener('click', (e) => {
+        updateSongName(songNameField.value, trackId, userId);
+    });
+    btnUpdateArtistName.addEventListener('click', (e) => {
+        updateArtistName(artistNameField.value, trackId, userId);
+    });
+    btnUpdateTrackImage.addEventListener('click', (e) => {
+        updateImage(trackId, trackImageField.files[0], trackData[1].ImagePath, userId);
+    });
+    btnUpdateTrackAudio.addEventListener('click', (e) => {
+        updateAudio(trackId, audioImageField.files[0], trackData[1].AudioPath, userId)
+    });
+}
+
+const updateSongName = async function(songName, trackId, userId) {
+    await updateSongNameToFirestore(songName, trackId);
+    renderUserUploads(userId);
+}
+
+const updateArtistName = async function(artistName, trackId, userId) {
+    await updateArtistNameToFirestore(artistName, trackId);
+    renderUserUploads(userId);
+}
+
+async function updateImage(trackId, songImage, imagePath, userId) {
+    sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
+    let uploadViewTag = document.querySelector('#upload-view-tag');
+    const imgName = songImage.name;
+
+    const imageMetaData = {
+        contentType: songImage.type
+    }
+
+    const imageStorageRef = sRef(storage, 'Images/' + imgName);
+
+    const imageUploadTask = uploadBytesResumable(imageStorageRef, songImage, imageMetaData);
+
+    imageUploadTask.on('state-changed', (snapshot) => {
+        const progress = Math.trunc((snapshot.bytesTransferred /snapshot.totalBytes) * 100);
+        console.log('Upload is ' + progress + '% done');
+        uploadViewTag.innerHTML = `
+            <h2>Please wait as we update the Track Image</h2>
+            <p>Image upload is ${progress}% done...</p>
+        `;
+    },
+    (error) => {
+        alert("error: image not uploaded");
+    },
+    (async () => {
+        await getDownloadURL(imageUploadTask.snapshot.ref).then(async (downloadURL) => {
+            uploadViewTag.innerHTML = `
+                <p>Update Complete! you'll be redirected in a few seconds</p>
+            `;
+            await updateImageToFirestore(downloadURL, trackId, imgName);
+            await deleteImageFromStorage(imagePath);
+        })
+        setTimeout(function () {
+            renderUserUploads(userId);
+        }, 3000);
+    }),
+    );
+    
+}   
+
+async function updateAudio(trackId, songAudio, audioPath, userId) {
+    sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
+    let uploadViewTag = document.querySelector('#upload-view-tag');
+    const audioName = songAudio.name;
+
+    const audioMetaData = {
+        contentType: songAudio.type
+    }
+
+    const audioStorageRef = sRef(storage, 'Tracks/' + audioName);
+
+    const audioUploadTask = uploadBytesResumable(audioStorageRef, songAudio, audioMetaData);
+
+    audioUploadTask.on('state-changed', (snapshot) => {
+        const progress = Math.trunc((snapshot.bytesTransferred /snapshot.totalBytes) * 100);
+        console.log('Upload is ' + progress + '% done');
+        uploadViewTag.innerHTML = `
+            <h2>Please wait as we update the Song</h2>
+            <p>Song upload is ${progress}% done...</p>
+        `;
+    },
+    (error) => {
+        alert("error: audio not uploaded");
+    },
+    (async () => {
+        await getDownloadURL(audioUploadTask.snapshot.ref).then(async (downloadURL) => {
+            uploadViewTag.innerHTML = `
+                <p>Update Complete! you'll be redirected in a few seconds</p>
+            `;
+            await updateAudioToFirestore(downloadURL, trackId, audioName);
+            await deleteAudioFromStorage(audioPath);
+        })
+        setTimeout(function () {
+            renderUserUploads(userId);
+        }, 3000);
+    }),
+    );
+    
+}  
+
+// Delete UI
+const deleteTrackFromFirebase = async function(track, userId) {
+    const trackId = track[0]
+    const trackImagePath = track[1].ImagePath;
+    const trackAudioPath = track[1].AudioPath;
+
+    await deleteCommentsByTrackId(trackId);
+    await deleteTrackFromFirestore(trackId);
     await deleteImageFromStorage(trackImagePath);
     await deleteAudioFromStorage(trackAudioPath);
 
@@ -619,13 +741,10 @@ const renderIndex = function() {
         const sectionName = "main";
         if(user) {
             if(user.isAnonymous) {
-                console.log('anonymous');
                 isLoggedIn = false;
                 navUI(isLoggedIn);
                 sectionUI(sectionName);
             } else {
-                console.log('not anonymous');
-                console.log(user.uid);
                 const userId = user.uid;
                 isLoggedIn = true;
                 navUI(isLoggedIn, userId);
@@ -634,8 +753,6 @@ const renderIndex = function() {
         } else {
             isLoggedIn = false;
             anonymousSignIn();
-            // navUI(isLoggedIn);
-            // sectionUI(sectionName);
         }
 
     });

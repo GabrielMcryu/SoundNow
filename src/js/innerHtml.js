@@ -28,13 +28,13 @@ export const dashboardUI = (track) => {
     let html = `
     <div class="container-track track">
         <div class="track-details">
-            <img class="track-image" id="track-image" src="${track.ImageUrl}" alt="">
+            <img class="track-image" id="track-image" src="${track[1].ImageUrl}" alt="">
             <div class="track-description">
-                <h2>${track.SongName}</h2>
-                <p>${track.ArtistName}</p>
+                <h2>${track[1].SongName}</h2>
+                <p>${track[1].ArtistName}</p>
             </div>
             <div class="track-choice">
-                <button class="btn-track-choice" id="btn-choice" value="${track.SongName}">Play</button>
+                <button class="btn-track-choice" id="btn-choice" value="${track[0]}">Play</button>
             </div>
         </div>
     </div>
@@ -215,15 +215,51 @@ export const uploaderTracksUI = (track) => {
     let html = `
     <div class="container-track track">
         <div class="track-details">
-            <img class="track-image" id="track-image" src="${track.ImageUrl}" alt="">
+            <img class="track-image" id="track-image" src="${track[1].ImageUrl}" alt="">
             <div class="track-description">
-                <h2>${track.SongName}</h2>
-                <p>${track.ArtistName}</p>
+                <h2>${track[1].SongName}</h2>
+                <p>${track[1].ArtistName}</p>
             </div>
             <div class="track-choice">
-                <button class="btn-track-choice" id="btn-choice" value="${track.SongName}">Play</button>
-                <button class="btn-track-update" id="btn-update" value="${track.SongName}">Update</button>
-                <button class="btn-track-delete" id="btn-delete" value="${track.SongName}">Delete</button>
+                <button class="btn-track-choice" id="btn-choice" value="${track[0]}">Play</button>
+                <button class="btn-track-update" id="btn-update" value="${track[0]}">Update</button>
+                <button class="btn-track-delete" id="btn-delete" value="${track[0]}">Delete</button>
+            </div>
+        </div>
+    </div>
+    `;
+    return html;
+}
+
+export const updateTrackUI = (trackData) => {
+    let html = `
+    <div class="container upload">
+        <div class="form">
+            <h2 class="form-header">Update Track</h2>
+            <label class="form-label">Song Name:</label>
+            <div class="update-input">
+                <input class="update-input-field" id="song-name-input" value="${trackData[1].SongName}" type="text" name="songName">
+                <button class="update-input-button" id="btn-update-song-name" value="">Update</button>
+            </div>
+
+            <label class="form-label">Artist Name:</label>
+            <div class="update-input">
+                <input class="update-input-field" id="artist-name-input" value="${trackData[1].ArtistName}" type="text" name="artistName">
+                <button class="update-input-button" id="btn-update-artist-name" value="">Update</button>
+            </div>
+            
+
+            <label class="form-label">Upload Song Image:</label>
+            <div class="update-input">
+                <input class="update-input-field input-btn" id="track-image-input" type="file" name="songImage" accept="image/png, image/jpeg">
+                <button class="update-input-button" id="btn-update-track-image" value="">Update</button>
+            </div>
+            
+
+            <label class="form-label">Upload Song:</label>
+            <div class="update-input">
+                <input class="update-input-field input-btn" id="track-audio-input" type="file" name="songAudio" accept="audio/mp3">
+                <button class="update-input-button" id="btn-update-track-audio" value="">Update</button>
             </div>
         </div>
     </div>

@@ -114,11 +114,11 @@ export const registerUser = async function(email, password) {
 // GET TRACKS FROM FIRESTORE
 export const getTracksFromFirestore = async function() {
     let tracks = [];
+    let tracksWithId = [];
     const q = query(collection(db, "tracks"));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-        console.log(doc.id)
-        tracks.push(doc.data());
+        tracks.push([doc.id, doc.data()]);
     });
     return tracks;
 }
@@ -129,7 +129,7 @@ export const getTrackBySongName = async function(songName) {
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
         if(doc.data().SongName.toLowerCase().includes(songName)) {
-                tracks.push(doc.data());
+                tracks.push([doc.id, doc.data()]);
         }
     });
     return tracks;
@@ -141,7 +141,7 @@ export const getTrackByArtistName = async function(artistName) {
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
         if(doc.data().ArtistName.toLowerCase().includes(artistName)) {
-                tracks.push(doc.data());
+                tracks.push([doc.id, doc.data()]);
         }
     });
     return tracks;
@@ -153,7 +153,7 @@ export const getTracksByUploaderId = async function(userId) {
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
         if(doc.data().UploaderId.includes(userId)) {
-            tracks.push(doc.data());
+            tracks.push([doc.id, doc.data()]);
         }
     });
     return tracks;
@@ -174,8 +174,8 @@ export const getTrackFromFirestore = async function(trackPath) {
 
 ////////////////////////////////////////////
 // DELETE TRACK FROM FIRESTORE AND STORAGE
-export const deleteTrackFromFirestore = async function(trackPath) {
-    await deleteDoc(doc(db, "tracks", trackPath));
+export const deleteTrackFromFirestore = async function(trackId) {
+    await deleteDoc(doc(db, "tracks", trackId));
 }
 
 export const deleteImageFromStorage = async function(imagePath) {
@@ -198,11 +198,11 @@ export const deleteAudioFromStorage = async function(audioPath) {
     });
 }
 
-export const deleteCommentsByTrackId = async function(songName) {
+export const deleteCommentsByTrackId = async function(trackId) {
     const q = query(collection(db, "comments"));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (document) => {
-        if(document.data().SongName.includes(songName)) {
+        if(document.data().TrackId.includes(trackId)) {
             await deleteDoc(doc(db, "comments", document.id));
         }
     });
@@ -210,12 +210,12 @@ export const deleteCommentsByTrackId = async function(songName) {
 
 ///////////////////////////////////////////
 // GET AND ADD COMMENTS TO FIRESTORE
-export const addCommentToFirestore = async function(name, comment, songName) {
+export const addCommentToFirestore = async function(name, comment, trackId) {
     const songRef = collection(db, 'comments');
     await addDoc(songRef, {
         Name: name,
         Comment: comment,
-        SongName: songName,
+        TrackId: trackId,
         createdAt: serverTimestamp()
     }).then(() => {
         console.log('comment added');
@@ -257,6 +257,19 @@ export async function SaveToFirestore(imgUrl, songName, artistName, songPath, us
 
     console.log('image upload finished');
 }
+
+export async function SaveTrackToFirestore(imgUrl, songUrl, songName, artistName, userId, imagePath, audioPath) {
+    const songRef = collection(db, 'tracks');
+    await addDoc(songRef, {
+        SongName: songName,
+        ArtistName: artistName,
+        ImageUrl: imgUrl,
+        SongUrl: songUrl,
+        UploaderId: userId,
+        ImagePath: imagePath,
+        AudioPath: audioPath
+    }, { merge: true });
+}
  
 export async function SaveAudioToFirestore(songUrl, songPath) {
     const songRef = doc(db, "tracks", songPath);
@@ -265,4 +278,36 @@ export async function SaveAudioToFirestore(songUrl, songPath) {
     }, { merge: true });
 
     console.log('audio upload finished');
+}
+
+////////////////////////////////////////////
+// UPDATE TO FIREBASE
+export async function updateSongNameToFirestore(songName, trackId) {
+    const songRef = doc(db, "tracks", trackId);
+    await updateDoc(songRef, {
+        SongName: songName
+    }, { merge: true });
+}
+
+export async function updateArtistNameToFirestore(artistName, trackId) {
+    const songRef = doc(db, "tracks", trackId);
+    await updateDoc(songRef, {
+        ArtistName: artistName
+    }, { merge: true });
+}
+
+export async function updateImageToFirestore(imageUrl, trackId, imgPath) {
+    const songRef = doc(db, "tracks", trackId);
+    await updateDoc(songRef, {
+        ImageUrl: imageUrl,
+        ImagePath: imgPath
+    }, { merge: true });
+}
+
+export async function updateAudioToFirestore(songUrl, trackId, audioPath) {
+    const songRef = doc(db, "tracks", trackId);
+    await updateDoc(songRef, {
+        SongUrl: songUrl,
+        AudioPath: audioPath
+    }, { merge: true });
 }
