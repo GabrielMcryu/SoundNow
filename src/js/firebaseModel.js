@@ -29,7 +29,9 @@ const storage = getStorage();
 const db = getFirestore();
 
 //////////////////////////////////////////////
-// AUTHENTICATION
+// AUTHENTICATION                           //
+//////////////////////////////////////////////
+// Lets user Sign in with email
 export const emailSignIn = async function(email, password) {
     signInWithEmailAndPassword(auth, email, password)
         .then((cred) => {
@@ -40,6 +42,7 @@ export const emailSignIn = async function(email, password) {
         });
 }
 
+// Lets user Sign in with Google
 export const googleSignIn = async function() {
     signInWithRedirect(auth, provider);
 
@@ -64,6 +67,7 @@ export const googleSignIn = async function() {
   });
 }
 
+// Lets user sign in with Facebook
 export const faceBookSignIn = async function() {
     signInWithRedirect(auth, fbProvider);
 
@@ -88,6 +92,7 @@ export const faceBookSignIn = async function() {
   });
 }
 
+// Lets user sign in anonymously
 export const anonymousSignIn = async function() {
     signInAnonymously(auth)
   .then(() => {
@@ -110,8 +115,10 @@ export const registerUser = async function(email, password) {
     });
 }
 
-///////////////////////////////////////////
-// GET TRACKS FROM FIRESTORE
+/////////////////////////////////////////////
+// GET TRACKS FROM FIRESTORE               //
+/////////////////////////////////////////////
+// Gets all tracks from firestore
 export const getTracksFromFirestore = async function() {
     let tracks = [];
     let tracksWithId = [];
@@ -123,6 +130,7 @@ export const getTracksFromFirestore = async function() {
     return tracks;
 }
 
+// Gets tracks from Firestore by SongName
 export const getTrackBySongName = async function(songName) {
     let tracks = [];
     const q = query(collection(db, "tracks"));
@@ -135,6 +143,7 @@ export const getTrackBySongName = async function(songName) {
     return tracks;
 }
 
+// Gets Tracks from firestore by ArtistName
 export const getTrackByArtistName = async function(artistName) {
     let tracks = [];
     const q = query(collection(db, "tracks"));
@@ -147,6 +156,7 @@ export const getTrackByArtistName = async function(artistName) {
     return tracks;
 }
 
+// Gets Tracks from firestore by Uploader Id
 export const getTracksByUploaderId = async function(userId) {
     let tracks = [];
     const q = query(collection(db, "tracks"));
@@ -159,9 +169,10 @@ export const getTracksByUploaderId = async function(userId) {
     return tracks;
 }
 
-export const getTrackFromFirestore = async function(trackPath) {
+// Gets one Track from firestore by Track Id
+export const getTrackFromFirestore = async function(trackId) {
     let trackData = {};
-    const docRef = doc(db, "tracks", trackPath);
+    const docRef = doc(db, "tracks", trackId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -172,12 +183,15 @@ export const getTrackFromFirestore = async function(trackPath) {
     return trackData;
 }
 
-////////////////////////////////////////////
-// DELETE TRACK FROM FIRESTORE AND STORAGE
+/////////////////////////////////////////////
+// DELETE TRACK FROM FIRESTORE AND STORAGE //
+/////////////////////////////////////////////
+// Delete Track from firestore by TrackId
 export const deleteTrackFromFirestore = async function(trackId) {
     await deleteDoc(doc(db, "tracks", trackId));
 }
 
+// Delete Image from Firebase Storage
 export const deleteImageFromStorage = async function(imagePath) {
     const imageRef = ref(storage, `Images/${imagePath}`);
     // Delete the Image
@@ -188,6 +202,7 @@ export const deleteImageFromStorage = async function(imagePath) {
     });
 }
 
+// Delete Audio From Firebase Storage
 export const deleteAudioFromStorage = async function(audioPath) {
     const audioRef = ref(storage, `Tracks/${audioPath}`);
     // Delete the Audio
@@ -198,6 +213,7 @@ export const deleteAudioFromStorage = async function(audioPath) {
     });
 }
 
+// Delete Comments from Firebase by TrackId
 export const deleteCommentsByTrackId = async function(trackId) {
     const q = query(collection(db, "comments"));
     const querySnapshot = await getDocs(q);
@@ -208,8 +224,9 @@ export const deleteCommentsByTrackId = async function(trackId) {
     });
 }
 
-///////////////////////////////////////////
-// GET AND ADD COMMENTS TO FIRESTORE
+/////////////////////////////////////////////
+// GET COMMENTS FROM FIRESTORE             //
+/////////////////////////////////////////////
 export const addCommentToFirestore = async function(name, comment, trackId) {
     const songRef = collection(db, 'comments');
     await addDoc(songRef, {
@@ -222,42 +239,10 @@ export const addCommentToFirestore = async function(name, comment, trackId) {
     });
 }
 
-// to be updated
-export const getCommentsFromFirestore2 = async function(trackData) {
-    let comments = [];
-    const colRef = collection(db, 'comments');
-    const q = query(colRef, orderBy('createdAt'));
-    const songName = trackData.SongName;
-    const unsubscribe = onSnapshot(q,async (snapshot) => {
-        snapshot.forEach(async (doc) => {
-            if(doc.data().SongName === songName) {
-                comments.push(doc.data());
-            }
-        });
-        // renderTrack(trackData, comments);
-    });
-    console.log(comments.length);
-    return comments;
-}
-
-
-////////////////////////////////////////////
-// UPLOAD TRACK TO FIREBASE
-
-export async function SaveToFirestore(imgUrl, songName, artistName, songPath, userId, imagePath, audioPath) {
-    const songRef = doc(db, 'tracks', songPath);
-    await setDoc(songRef, {
-        SongName: songName,
-        ArtistName: artistName,
-        ImageUrl: imgUrl,
-        UploaderId: userId,
-        ImagePath: imagePath,
-        AudioPath: audioPath,
-    }, { merge: true });
-
-    console.log('image upload finished');
-}
-
+/////////////////////////////////////////////
+// UPLOAD TRACK TO FIREBASE                //
+/////////////////////////////////////////////
+// Save Track data to Firestore
 export async function SaveTrackToFirestore(imgUrl, songUrl, songName, artistName, userId, imagePath, audioPath) {
     const songRef = collection(db, 'tracks');
     await addDoc(songRef, {
@@ -270,18 +255,11 @@ export async function SaveTrackToFirestore(imgUrl, songUrl, songName, artistName
         AudioPath: audioPath
     }, { merge: true });
 }
- 
-export async function SaveAudioToFirestore(songUrl, songPath) {
-    const songRef = doc(db, "tracks", songPath);
-    await updateDoc(songRef, {
-        SongUrl: songUrl
-    }, { merge: true });
 
-    console.log('audio upload finished');
-}
-
-////////////////////////////////////////////
-// UPDATE TO FIREBASE
+/////////////////////////////////////////////
+// UPDATE TO FIREBASE                      //
+/////////////////////////////////////////////
+// Updates Song Name Using Track Id
 export async function updateSongNameToFirestore(songName, trackId) {
     const songRef = doc(db, "tracks", trackId);
     await updateDoc(songRef, {
@@ -289,6 +267,7 @@ export async function updateSongNameToFirestore(songName, trackId) {
     }, { merge: true });
 }
 
+// Updates Artist Name Using Track Id
 export async function updateArtistNameToFirestore(artistName, trackId) {
     const songRef = doc(db, "tracks", trackId);
     await updateDoc(songRef, {
@@ -296,6 +275,7 @@ export async function updateArtistNameToFirestore(artistName, trackId) {
     }, { merge: true });
 }
 
+// Updates Image data to Firestore By Track Id
 export async function updateImageToFirestore(imageUrl, trackId, imgPath) {
     const songRef = doc(db, "tracks", trackId);
     await updateDoc(songRef, {
@@ -304,6 +284,7 @@ export async function updateImageToFirestore(imageUrl, trackId, imgPath) {
     }, { merge: true });
 }
 
+// Updates Audio data to Firestore By Track Id
 export async function updateAudioToFirestore(songUrl, trackId, audioPath) {
     const songRef = doc(db, "tracks", trackId);
     await updateDoc(songRef, {

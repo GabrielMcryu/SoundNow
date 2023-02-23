@@ -1,5 +1,6 @@
 import trackImage from '../img/img1.jpg';
 
+// Html Code when User is logged in
 export const loggedInNavUI = () => {
     let html = `
         <ul class="main-nav-list">
@@ -12,6 +13,7 @@ export const loggedInNavUI = () => {
     return html;
 }
 
+// Html Code when User is logged in anonymously or signed out
 export const loggedOutNavUI = () => {
     let html = `
         <ul class="main-nav-list">
@@ -24,6 +26,7 @@ export const loggedOutNavUI = () => {
     return html;
 }
 
+// Html code for the main page
 export const dashboardUI = (track) => {
     let html = `
     <div class="container-track track">
@@ -42,6 +45,7 @@ export const dashboardUI = (track) => {
     return html;
 }
 
+// Html Code for the track page
 export const trackUI = (trackData) => {
     let html = `
     <div class="container">
@@ -80,6 +84,7 @@ export const trackUI = (trackData) => {
     return html;
 }
 
+// Html code for the upload page
 export const uploadUI = () => {
     let html = `
     <div class="container upload">
@@ -106,6 +111,7 @@ export const uploadUI = () => {
     return html;
 }
 
+// Html code for the login page
 export const loginUI = () => {
     let html = `
     <div class="container login">
@@ -128,7 +134,6 @@ export const loginUI = () => {
             <div class="form-buttons">
                 <button class="button-social button-google" id="google-sign-in">Google</button>
                 <button class="button-social button-facebook" id="facebook-sign-in">Facebook</button>
-                <!-- <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button> -->
             </div>
         </div>
     </div>
@@ -136,6 +141,7 @@ export const loginUI = () => {
     return html
 }
 
+// Html code for registerpage
 export const registerUI = () => {
     let html = `
     <div class="container register" id="registration">
@@ -158,7 +164,6 @@ export const registerUI = () => {
             <div class="form-buttons">
                 <button class="button-social button-google" id="google-sign-in">Google</button>
                 <button class="button-social button-facebook" id="facebook-sign-in">Facebook</button>
-                <!-- <button class="button-social button-anonymous" id="anonymous-sign-in">Anonymously</button> -->
             </div>
         </div>
     </div>
@@ -166,6 +171,7 @@ export const registerUI = () => {
     return html;
 }
 
+// Html code for Seach bar
 export const searchUI = () => {
     let html = `
     <div class="search-option">
@@ -182,6 +188,7 @@ export const searchUI = () => {
     return html
 }
 
+// Html Code for Adding Comment form
 export const addCommentUI = () => {
     let html = `
     <div class="comment-form">
@@ -200,6 +207,7 @@ export const addCommentUI = () => {
     return html;
 }
 
+// Html code for Listing Comments
 export const commentsUI = (name, comment, commentDate) => {
     let html = `
     <div class="comment-section">
@@ -211,6 +219,7 @@ export const commentsUI = (name, comment, commentDate) => {
     return html;
 }
 
+// Html code for Showing Tracks by Uploader Id
 export const uploaderTracksUI = (track) => {
     let html = `
     <div class="container-track track">
@@ -231,6 +240,7 @@ export const uploaderTracksUI = (track) => {
     return html;
 }
 
+// Html Code for Update track page
 export const updateTrackUI = (trackData) => {
     let html = `
     <div class="container upload">

@@ -1,12 +1,11 @@
 import {
     getTracksFromFirestore,getTrackBySongName, 
     getTrackByArtistName, getTrackFromFirestore, 
-    addCommentToFirestore, SaveToFirestore, 
-    SaveAudioToFirestore, googleSignIn, 
-    faceBookSignIn, anonymousSignIn, getTracksByUploaderId,
-    emailSignIn, registerUser, getCommentsFromFirestore2,
-    deleteTrackFromFirestore, deleteImageFromStorage, deleteAudioFromStorage,
-    deleteCommentsByTrackId, updateSongNameToFirestore, updateArtistNameToFirestore,
+    addCommentToFirestore, googleSignIn, faceBookSignIn, 
+    anonymousSignIn, getTracksByUploaderId,emailSignIn, 
+    registerUser,deleteTrackFromFirestore, deleteImageFromStorage, 
+    deleteAudioFromStorage, deleteCommentsByTrackId, 
+    updateSongNameToFirestore, updateArtistNameToFirestore,
     SaveTrackToFirestore, updateImageToFirestore, updateAudioToFirestore
 } from './firebaseModel.js'
 
@@ -54,8 +53,11 @@ let trackDuration;
 let songIsPlaying = false;
 
 
-///////////////////////////////////////
-// UI
+///////////////////////////////////////////
+// UI                                    //
+///////////////////////////////////////////
+
+// Renders Navigation UI
 const navUI = function(isloggedIn, userId = null) {
     navigation.innerHTML = '';
     let html;
@@ -120,12 +122,14 @@ const navUI = function(isloggedIn, userId = null) {
     }
 }
 
+// Renders UI depending on Section depending on the page
 const sectionUI = async function(sectionName, trackData = null, commentsData = null, userId = null, trackId = null) {
     sectionTag.innerHTML = '';
     if (sectionName === "main") {
         let tracks = await getTracksFromFirestore();
         renderMain(tracks);
     } else if(sectionName === "upload") {
+        // Upload UI
         let html = uploadUI();
         sectionTag.insertAdjacentHTML('afterbegin', html);
 
@@ -142,13 +146,13 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         });
 
     } else if(sectionName === "login") {
+        // Login UI
         let html = loginUI();
         sectionTag.insertAdjacentHTML('afterbegin', html);
 
         const loginForm = document.querySelector('#login-form');
         const googleButton = document.querySelector('#google-sign-in');
         const faceBookButton = document.querySelector('#facebook-sign-in');
-        // const anonymousButton = document.querySelector('#anonymous-sign-in');
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = loginForm.email.value;
@@ -161,17 +165,14 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         faceBookButton.addEventListener('click', (e) => {
             faceBookSignIn();
         });
-        // anonymousButton.addEventListener('click', (e) => {
-        //     anonymousSignIn();
-        // });
     } else if(sectionName === "register") {
+        // Register UI
         let html = registerUI()
         sectionTag.insertAdjacentHTML('afterbegin', html);
 
         const registerForm = document.querySelector('#register-form');
         const googleButton = document.querySelector('#google-sign-in');
         const faceBookButton = document.querySelector('#facebook-sign-in');
-        const anonymousButton = document.querySelector('#anonymous-sign-in');
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = registerForm.email.value;
@@ -183,9 +184,6 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         });
         faceBookButton.addEventListener('click', (e) => {
             faceBookSignIn();
-        });
-        anonymousButton.addEventListener('click', (e) => {
-            anonymousSignIn();
         });
     } else if(sectionName === "track") {
         // Comments UI
@@ -237,6 +235,7 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
         loadTrack(songUrl);
 
     } else if(sectionName === "user-uploads") {
+        // User Uploads UI
         let tracks = await getTracksByUploaderId(userId);
         
         if(tracks.length == 0) {
@@ -267,10 +266,12 @@ const sectionUI = async function(sectionName, trackData = null, commentsData = n
     }
 }
 
+// Sends data to addCommentToFirestore Function
 const addCommentEvent = async function(name, comment, trackId) {
     await addCommentToFirestore(name, comment, trackId);
 }
 
+// Goes to designated SectionUI Choices
 const renderUpload = function(isLoggedIn, userId = null) {
     if(isLoggedIn) {
         const sectionName = "upload";
@@ -301,8 +302,9 @@ const renderUserUploads = function(userId) {
 }
 
 ////////////////////////////////////////////
-// UPLOAD TRACK TO FIREBASE
-
+// UPLOAD TRACK TO FIREBASE               //
+////////////////////////////////////////////
+// Uploads Image to Firebase storage and calls the UploadToStorage Function
 async function UploadImageToStorage(songName, artistName, songImage, songAudio, userId) {
     sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
     let uploadViewTag = document.querySelector('#upload-view-tag');
@@ -336,6 +338,7 @@ async function UploadImageToStorage(songName, artistName, songImage, songAudio, 
 
 }   
 
+// Uploads Track to Firebase Storage and adds Track Data to firestore
 async function UploadToStorage(imgUrl, songName, artistName, userId, imgName, songAudio) {
     sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
     let uploadViewTag = document.querySelector('#upload-view-tag');
@@ -377,8 +380,16 @@ async function UploadToStorage(imgUrl, songName, artistName, userId, imgName, so
 }   
 
 
-///////////////////////////////////////////
-// GET COMMENTS FROM FIRESTORE
+///////////////////////////////////////////////
+// GET COMMENTS FROM FIRESTORE               //
+///////////////////////////////////////////////
+// Sends Data to the getCommentFromFirestore Function
+const trackEvents = async function(trackId) {
+    const trackData = await getTrackFromFirestore(trackId);
+    getCommentsFromFirestore(trackData, trackId);
+}
+
+// Retrieves Comment Data from Firestore by TrackID
 const getCommentsFromFirestore = function(trackData, trackId) {
     const colRef = collection(db, 'comments');
     const q = query(colRef, orderBy('createdAt'));
@@ -394,7 +405,10 @@ const getCommentsFromFirestore = function(trackData, trackId) {
     });
 }
 
-
+///////////////////////////////////////////////
+// Render MAIN AND NULL SEARCH SECTIONS      //
+///////////////////////////////////////////////
+// Loads Main Section
 const renderMain = async function(tracks) {
     sectionTag.innerHTML = '';
     
@@ -436,35 +450,7 @@ const renderMain = async function(tracks) {
     
 }
 
-const trackEvents = async function(trackId) {
-    const trackData = await getTrackFromFirestore(trackId);
-    // const comments = await getCommentsFromFirestore2(trackData);
-    getCommentsFromFirestore(trackData, trackId);
-    // renderTrack(trackData, comments);
-}
-
-const searchEvents = async function(inputData, searchChoice) {
-    if(searchChoice === 'track-name') {
-        let tracks = await getTrackBySongName(inputData);
-        if(tracks.length < 1) {
-            const errorMessage = '<p class="error-text">No such Track Name found.</p>';
-            renderNullSearch(errorMessage);
-        } 
-        else {
-            renderMain(tracks)
-        }
-    } else if(searchChoice === 'artist') {
-        let tracks = await getTrackByArtistName(inputData);
-        if(tracks.length < 1) {
-            const errorMessage = '<p class="error-text">No such Artist Name found.</p>';
-            renderNullSearch(errorMessage);
-        } 
-        else {
-            renderMain(tracks)
-        }
-    }
-}
-
+// Loads Section when Search result shows Null
 const renderNullSearch = function(errorMessage) {
     sectionTag.innerHTML = '';
     sectionTag.insertAdjacentHTML('afterbegin', errorMessage);
@@ -490,7 +476,33 @@ const renderNullSearch = function(errorMessage) {
     });
 }
 
-// Update UI
+// Get User Input from search Field and sends it to respective functions
+const searchEvents = async function(inputData, searchChoice) {
+    if(searchChoice === 'track-name') {
+        let tracks = await getTrackBySongName(inputData);
+        if(tracks.length < 1) {
+            const errorMessage = '<p class="error-text">No such Track Name found.</p>';
+            renderNullSearch(errorMessage);
+        } 
+        else {
+            renderMain(tracks)
+        }
+    } else if(searchChoice === 'artist') {
+        let tracks = await getTrackByArtistName(inputData);
+        if(tracks.length < 1) {
+            const errorMessage = '<p class="error-text">No such Artist Name found.</p>';
+            renderNullSearch(errorMessage);
+        } 
+        else {
+            renderMain(tracks)
+        }
+    }
+}
+
+///////////////////////////////////////////////
+// Render UPDATE UI SECTION                  //
+///////////////////////////////////////////////
+// Renders the Update Track Section
 const renderUpdateTrack = function(trackData, userId) {
     const trackId = trackData[0];
     sectionTag.innerHTML = '';
@@ -521,16 +533,19 @@ const renderUpdateTrack = function(trackData, userId) {
     });
 }
 
+// Updates Song Name
 const updateSongName = async function(songName, trackId, userId) {
     await updateSongNameToFirestore(songName, trackId);
     renderUserUploads(userId);
 }
 
+// Updates Artist Name
 const updateArtistName = async function(artistName, trackId, userId) {
     await updateArtistNameToFirestore(artistName, trackId);
     renderUserUploads(userId);
 }
 
+// Uploads New Image to Firebase Storage and Deletes Old Image
 async function updateImage(trackId, songImage, imagePath, userId) {
     sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
     let uploadViewTag = document.querySelector('#upload-view-tag');
@@ -571,6 +586,7 @@ async function updateImage(trackId, songImage, imagePath, userId) {
     
 }   
 
+// Uploads New Audio to Firebase Storage and Deletes Old Audio
 async function updateAudio(trackId, songAudio, audioPath, userId) {
     sectionTag.innerHTML = `<div id="upload-view-tag" class="container upload-view"></div>`;
     let uploadViewTag = document.querySelector('#upload-view-tag');
@@ -611,7 +627,7 @@ async function updateAudio(trackId, songAudio, audioPath, userId) {
     
 }  
 
-// Delete UI
+// Deletes Track and related Data
 const deleteTrackFromFirebase = async function(track, userId) {
     const trackId = track[0]
     const trackImagePath = track[1].ImagePath;
@@ -625,9 +641,10 @@ const deleteTrackFromFirebase = async function(track, userId) {
     renderUserUploads(userId);
 }
 
-/////////////////////////////////////
-// PLAY OPTIONS
-
+/////////////////////////////////////////
+// PLAY OPTIONS                        //
+/////////////////////////////////////////
+// Function to load track to play
 const loadTrack = function(songUrl) {
     clearInterval(timer);
     resetSlider();
@@ -733,8 +750,10 @@ function songTimeUpdate() {
     }
 }
 
-
-// load main page
+/////////////////////////////////////////
+// MAIN PAGE                           //
+/////////////////////////////////////////
+// load main page when page opens or when function called
 const renderIndex = function() {
     onAuthStateChanged(auth, (user) => {
         let isLoggedIn
