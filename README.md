@@ -1,5 +1,5 @@
 # SOUNDNOW Music Web app
-This is a web application that lets users listen to music on the web. 
+This is music sharing web application that allows Users to upload and share their music to other users and also listen to Tracks that have been uploaded to the platform. The Application has been developed using Html/Css, JavaScript and Firebase 9.
 
 ## TABLE OF CONTENTS
 - [Technologies Used](#technologies-used)
