@@ -1,4 +1,5 @@
 # SOUNDNOW Music Web app
+This is a web application that lets users listen to music on the web. 
 
 ## TABLE OF CONTENTS
 - [Technologies Used](#technologies-used)
@@ -7,24 +8,25 @@
 - [Requirements](#requirements)
 ***
 
-# SoundNow
-This is a web application that lets users listen to music on the web. 
-
-
 # Technologies Used
+- [Vs Code](https://code.visualstudio.com/)
 - [Html/Css](https://www.w3.org/standards/webdesign/htmlcss)
 - [JavaScript](https://www.javascript.com/)
-- [Firebase](https://firebase.google.com/)
+- [Parcel](https://parceljs.org/)
+- [Firebase Firestore 9](https://firebase.google.com/docs/firestore)
 - [Azure Devops](https://azure.microsoft.com/en-us/products/devops)
 
 # Project Design Diagrams
-To be updated...
+You can view the project design diagram [here](https://www.figma.com/file/mjPl3jvyTv3djOl5NEBQlR/Untitled?node-id=0%3A1&t=BZMZxxcjQ5QJLhrg-1)
 
 # Features
 The web application will host multiple features such as:
 - Login and registration
+- Google and Facebook Sign in
 - Music player features
 - Authenticated users can upload songs
+- Authenticates Users Can Update and Delete the Tracks that they uploaded
+- Users can add comments to their Favourite Songs
 
 # Requirements
-To be updated....
+To run this application you will need to install [Nodejs](https://nodejs.org/en/) to run this application with parcel. 

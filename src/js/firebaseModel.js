@@ -2,15 +2,14 @@ import { initializeApp } from 'firebase/app'
 import firebaseConfig from './config.js'
 import {
     getFirestore, collection, 
-    getDocs, doc, setDoc, addDoc,
-    updateDoc, getDoc, query, onSnapshot, 
-    serverTimestamp, orderBy, deleteDoc
+    getDocs, doc, addDoc,
+    updateDoc, getDoc, query,
+    serverTimestamp, deleteDoc
 } from 'firebase/firestore'
 
 import {
     getAuth, signInWithEmailAndPassword, 
-    onAuthStateChanged, signOut, getRedirectResult,
-    GoogleAuthProvider, signInWithRedirect, TwitterAuthProvider,
+    getRedirectResult, GoogleAuthProvider, signInWithRedirect,
     createUserWithEmailAndPassword, FacebookAuthProvider, signInAnonymously
 } from 'firebase/auth'
 
