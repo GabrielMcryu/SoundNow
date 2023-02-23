@@ -1,5 +1,11 @@
 # SOUNDNOW Music Web app
-[[_TOC_]]
+
+## TABLE OF CONTENTS
+- [Technologies Used](#technologies-used)
+- [Project Design Diagrams](#project-design-diagrams)
+- [Features](#features)
+- [Requirements](#requirements)
+***
 
 # SoundNow
 This is a web application that lets users listen to music on the web. 
