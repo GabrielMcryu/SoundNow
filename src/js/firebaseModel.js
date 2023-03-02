@@ -77,6 +77,8 @@ export const faceBookSignIn = async function() {
     const token = credential.accessToken;
 
     const user = result.user;
+    console.log(user);
+    console.log(auth);
     // IdP data available using getAdditionalUserInfo(result)
     // ...
   }).catch((error) => {
