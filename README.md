@@ -14,7 +14,6 @@ This is music sharing web application that allows Users to upload and share thei
 - [JavaScript](https://www.javascript.com/)
 - [Parcel](https://parceljs.org/)
 - [Firebase Firestore 9](https://firebase.google.com/docs/firestore)
-- [Azure Devops](https://azure.microsoft.com/en-us/products/devops)
 
 # Project Design Diagrams
 You can view the project design diagram [here](https://www.figma.com/file/mjPl3jvyTv3djOl5NEBQlR/Untitled?node-id=0%3A1&t=BZMZxxcjQ5QJLhrg-1)
